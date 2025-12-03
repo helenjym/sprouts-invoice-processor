@@ -98,6 +98,7 @@ function InvoicePreviewer() {
 
 function DownloadButton() {
   // on click
+  // veriy inputs
   // get input rom supplier dropdown and download invoice and IPR
   // list of emails and suppliers
   // dimension - 7064-00

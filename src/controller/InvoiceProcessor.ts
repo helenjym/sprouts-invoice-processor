@@ -1,11 +1,7 @@
 
 import fs from 'fs';
 import {PDFParse} from 'pdf-parse';
-
-type Supplier  = {
-    name: string;
-    email: string;
-}
+import {PDFDocument, PDFTextField} from 'pdf-lib';
 
 class InvoicePayment {
     supplier: string;
@@ -16,6 +12,7 @@ class InvoicePayment {
     total: number;
     accountCode: number;
     description: string;
+    email: string;
 
     setSupplier(name: string) {
         this.supplier = name;
@@ -42,31 +39,27 @@ class InvoicePayment {
     setDescription(description: string) {
         this.description = description;
     }
+
+    setEmail(email: string) {
+        this.email = email;
+    }
 }
     
 export default class InvoiceGenerator {
 
-    private suppliers: Supplier[] = [
-        {name: "Discovery Organics", email: "accounting@discoveryorganics.ca"},
-        {name: "Horizon Distributors", email: "horizonar@horizondistributors.com"},
-        {name: "Westpoint Naturals", email: "accounting@discoveryorganics.ca"},
-        {name: "Ecolab", email: "accounting@discoveryorganics.ca"},
-        {name: "Cafe Etico", email: "accounting@discoveryorganics.ca"}
-    ];
-
     private dimension: string = "7064-00";
 
-    // generateInvoiceDetails(accCode: number, supplier: string, description: string) {
-    //     if (supplier === "Horizon Distributors") {
-    //         const invoice: InvoicePayment =  this.createHorizonInvoice(accCode, description);
-    //         console.log(invoice);
-    //     }
-    // }
+    static async generateInvoiceDetails(accCode: number, supplier: string, description: string) {
+        if (supplier === "Horizon Distributors") {
+            const invoice: InvoicePayment = await InvoiceGenerator.createHorizonInvoice(accCode, description);
+            console.log(invoice);
+        }
+    }
 
     static async createHorizonInvoice(accCode: number, description: string): Promise<InvoicePayment> { 
         const invoice = new InvoicePayment();
         // error handling
-        const invoiceFile = await fs.readFileSync('../../7915271_Horizon.pdf');
+        const invoiceFile = await fs.readFileSync('../../Invoice_7919828 (1).pdf');
         const parser = new PDFParse({data: invoiceFile});
 
         const result = await parser.getText();
@@ -86,19 +79,16 @@ export default class InvoiceGenerator {
             tempTotal = resultText.slice(subtotalIndex+20, subtotalIndex+20+totalComma) + resultText.slice(subtotalIndex+20+totalComma+1, endOfSubtotal);
         }
         const total = parseFloat(tempTotal);
-        console.log(total);
 
         // text is kind o arbitrarily ound
         const containerGstIndex = resultText.indexOf("Container GST");
         const textFromContainerGST = resultText.slice(containerGstIndex + 15);
         const endOfContainerGSTIndex = textFromContainerGST.indexOf("\n") + containerGstIndex + 15;
         const containerGST = parseFloat(resultText.slice(containerGstIndex + 15, endOfContainerGSTIndex));
-        console.log(containerGST);
 
         const textFromProductGST = resultText.slice(endOfContainerGSTIndex + 1);
         const endOfProductGSTIndex = textFromProductGST.indexOf("\n") + endOfContainerGSTIndex + 1;
         const productGST = parseFloat(resultText.slice(endOfContainerGSTIndex + 1, endOfProductGSTIndex));
-        console.log(productGST);
 
         const totalGST = containerGST + productGST;
         const subtotal = parseFloat((total - totalGST).toFixed(2));
@@ -111,14 +101,68 @@ export default class InvoiceGenerator {
         invoice.setGst(totalGST);
         invoice.setTotal(total);
         invoice.setDescription(description);
+        invoice.setEmail("horizonar@horizondistributors.com");
+        await this.createIPR(invoice);
         return invoice;
     }
 
-    createIPR(invoice: InvoicePayment) {
-        //  get signed IPR
-        //  parse and put in invoice payment details
+    static async createIPR(invoice: InvoicePayment) {
+        const pdfBytes = await fs.readFileSync("../../Invoice-Requisition-Form_Nov-2024_Fillable.pdf");
+        const pdfDoc = await PDFDocument.load(pdfBytes);
+        const form = pdfDoc.getForm();
+        const formFields = form.getFields();
+        formFields.forEach(field => {
+            console.log(field.getName());
+        })
+        // text 9 is department name
+        // text 13 is EFT email payment notification
+
+        const clubName = form.getTextField("Text9");
+        const EFTNotifEmail = form.getTextField("Text13");
+        const invoiceDate = form.getTextField("Invoice Date");
+        const payableTo = form.getTextField("Payable to");
+        const accCode = form.getTextField("Account Code 5 digitsRow1");
+        const dimension = form.getTextField("Dimension 6 digitsRow1");
+        const amount = form.getTextField("AmountRow1");
+        const gstAmount = form.getTextField("GST Amount If Applicable000000");
+        const subtotal = form.getTextField("AmountSubtotal");
+        const total = form.getTextField("GST Amount If ApplicableTOTAL");
+        const invNum = form.getTextField("Invoice Number");
+        const paymentPurpose = form.getTextField("Purpose of payment");
+        const initContactInfo = form.getTextField("Initiators Contact Information");
+        const initName = form.getTextField("Initiated by");
+        const eftCheck = form.getCheckBox("Check Box10");
+        clubName.setText("UBC Sprouts");
+        EFTNotifEmail.setText(invoice.email);
+        accCode.setText(invoice.accountCode.toString());
+        invoiceDate.setText(invoice.date);
+        dimension.setText("7064-00");
+        gstAmount.setText(invoice.gst.toString());
+        subtotal.setText(invoice.subtotal.toString());
+        total.setText(invoice.total.toString());
+        invNum.setText(invoice.invoiceNum.toString());
+        payableTo.setText(invoice.supplier);
+        // need to change!
+        paymentPurpose.setText("Cafe purchases");
+        initContactInfo.setText("treasurer@ubcsprouts.ca");
+        // also should be given by user
+        initName.setText("Helen Ma");
+        amount.setText(invoice.subtotal.toString());
+        eftCheck.check();
+
+
+        // console.log(pdfDoc.getForm().getTextField('Text1'));
+        //  parse a)nd put in invoice payment details
         //  persist inished ile to disk named invoicenum_suppliername.pdf
         //  mergepdfs()
+        const pdfSavedBytes = await pdfDoc.save();
+        fs.writeFile('Processed IPR.pdf', pdfSavedBytes, 'utf8', (err) => {
+            if (err) {
+              console.error('Error writing file:', err);
+              return;
+            }
+            console.log('IPR file written successfully!');
+          });
     }
 
     // mergePDfs() {
@@ -129,4 +173,4 @@ export default class InvoiceGenerator {
 
 }
 
-InvoiceGenerator.createHorizonInvoice(60015, "Cafe purchases").then((data) => console.log(data));
+InvoiceGenerator.createHorizonInvoice(60015, "Cafe purchases").then((data) => InvoiceGenerator.createIPR(data).then(() => console.log("hi")));

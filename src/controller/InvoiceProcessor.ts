@@ -2,6 +2,12 @@
 import fs from 'fs';
 import {PDFParse} from 'pdf-parse';
 import {PDFDocument, PDFTextField} from 'pdf-lib';
+import scribe from 'scribe.js-ocr';
+import {parse} from 'node-html-parser';
+import {XMLParser} from 'fast-xml-parser';
+import { DOMParser } from '@xmldom/xmldom'
+const path = require('node:path');
+
 
 class InvoicePayment {
     supplier: string;
@@ -11,8 +17,9 @@ class InvoicePayment {
     gst: number;
     total: number;
     accountCode: number;
-    description: string;
     email: string;
+    purpose: string;
+    treasurerName: string;
 
     setSupplier(name: string) {
         this.supplier = name;
@@ -36,27 +43,73 @@ class InvoicePayment {
         this.accountCode = accountCode;
     }
 
-    setDescription(description: string) {
-        this.description = description;
-    }
-
     setEmail(email: string) {
         this.email = email;
     }
-}
+
+    setPaymentPurpose(purpose: string) {
+        this.purpose = purpose;
+    }
+
+    setName(name: string) {
+        this.treasurerName = name;
+    }
+} 
     
 export default class InvoiceGenerator {
 
     private dimension: string = "7064-00";
 
-    static async generateInvoiceDetails(accCode: number, supplier: string, description: string) {
+    static async generateInvoiceDetails(accCode: number, supplier: string, purpose: string, treasurerName: string) {
         if (supplier === "Horizon Distributors") {
-            const invoice: InvoicePayment = await InvoiceGenerator.createHorizonInvoice(accCode, description);
+            const invoice: InvoicePayment = await InvoiceGenerator.createHorizonInvoice(accCode, purpose, treasurerName);
             console.log(invoice);
         }
     }
 
-    static async createHorizonInvoice(accCode: number, description: string): Promise<InvoicePayment> { 
+    static async createInvoiceOCR() {
+        const filename = '../../18196 _Etico.pdf';
+        const res = await scribe.extractText([filename], ['eng'], 'hocr', {mode: "quality"});
+        // const options = {
+        //     ignoreAttributes: false,
+        //     format: true,
+        //     preserveOrder: true,
+        //     allowBooleanAttributes: true
+        // };
+        
+        // const parser = new XMLParser(options);
+        // const json = parser.parse(res);
+        // console.log(json[1].html[1].body)
+        let lines: {text: string, x0: number, y0: number, x1: number, y1: number}[] = [];
+        const doc = new DOMParser().parseFromString(res, 'text/xml');
+        const docLines = doc.getElementsByClassName("ocr_line");
+        let line: any;
+        let textChild: any;
+        // console.log(docLines[0].childNodes[8]);
+        for (let i = 0; i <= (docLines.length - 1); i++) {
+            const docLine = docLines[i];
+            if (docLine.hasChildNodes()) {
+                const numChildren = docLine.childNodes.length;
+                let text: string;
+                for (let n = 0; n <= (numChildren - 1); n++) {
+                    if (docLine.childNodes[n].hasChildNodes()) {
+                        console.log(docLine.childNodes[n].childNodes[0].nodeValue);
+                    }    
+                }
+            }
+        }
+        // console.log(doc.getElementsByTagName("span"));
+        // const text = parse(json.html.body.div[0])
+        // return essentially an xml
+        // console.log(json.html.body.div[0].span[0]);
+        // console.log(res.substring(85000));
+        await scribe.terminate();
+        // const root = parse(res);
+        // console.log(root);
+
+    }
+
+    static async createHorizonInvoice(accCode: number, purpose: string, treasurerName: string): Promise<InvoicePayment> { 
         const invoice = new InvoicePayment();
         // error handling
         const invoiceFile = await fs.readFileSync('../../Invoice_7919828 (1).pdf');
@@ -80,7 +133,7 @@ export default class InvoiceGenerator {
         }
         const total = parseFloat(tempTotal);
 
-        // text is kind o arbitrarily ound
+        // text is kind of arbitrarily found
         const containerGstIndex = resultText.indexOf("Container GST");
         const textFromContainerGST = resultText.slice(containerGstIndex + 15);
         const endOfContainerGSTIndex = textFromContainerGST.indexOf("\n") + containerGstIndex + 15;
@@ -100,8 +153,9 @@ export default class InvoiceGenerator {
         invoice.setSubtotal(subtotal);
         invoice.setGst(totalGST);
         invoice.setTotal(total);
-        invoice.setDescription(description);
+        invoice.setPaymentPurpose(purpose);
         invoice.setEmail("horizonar@horizondistributors.com");
+        invoice.setName(treasurerName);
         await this.createIPR(invoice);
         return invoice;
     }
@@ -143,10 +197,10 @@ export default class InvoiceGenerator {
         invNum.setText(invoice.invoiceNum.toString());
         payableTo.setText(invoice.supplier);
         // need to change!
-        paymentPurpose.setText("Cafe purchases");
+        paymentPurpose.setText(invoice.purpose);
         initContactInfo.setText("treasurer@ubcsprouts.ca");
         // also should be given by user
-        initName.setText("Helen Ma");
+        initName.setText(invoice.treasurerName);
         amount.setText(invoice.subtotal.toString());
         eftCheck.check();
 
@@ -173,4 +227,6 @@ export default class InvoiceGenerator {
 
 }
 
-InvoiceGenerator.createHorizonInvoice(60015, "Cafe purchases").then((data) => InvoiceGenerator.createIPR(data).then(() => console.log("hi")));
+
+// InvoiceGenerator.createHorizonInvoice(60015, "Cafe purchases", "Helen Ma").then((data) => InvoiceGenerator.createIPR(data).then(() => console.log("hi")));
+InvoiceGenerator.createInvoiceOCR().then(() => {});

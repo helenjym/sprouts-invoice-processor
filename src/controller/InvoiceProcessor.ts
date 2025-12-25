@@ -350,47 +350,67 @@ class InvoicePaymentRequisition {
     }
 
     static async create(invoice: InvoicePayment): Promise<InvoicePaymentRequisition> {
-        const pdfBytes = await fs.readFileSync("../../Invoice-Requisition-Form_Nov-2024_Fillable.pdf");
-        const IPRFile = await PDFDocument.load(pdfBytes);
-        IPRFile.removePage(1);
-        const form = IPRFile.getForm();
-                // text 9 is department name
-                // text 13 is EFT email payment notification
-        const clubName = form.getTextField("Text9");
-        const EFTNotifEmail = form.getTextField("Text13");
-        const invoiceDate = form.getTextField("Invoice Date");
-        const payableTo = form.getTextField("Payable to");
-        const accCode = form.getTextField("Account Code 5 digitsRow1");
-        const dimension = form.getTextField("Dimension 6 digitsRow1");
-        const amount = form.getTextField("AmountRow1");
-        const gstAmount = form.getTextField("GST Amount If Applicable000000");
-        const subtotal = form.getTextField("AmountSubtotal");
-        const total = form.getTextField("GST Amount If ApplicableTOTAL");
-        const invNum = form.getTextField("Invoice Number");
-        const paymentPurpose = form.getTextField("Purpose of payment");
-        const initContactInfo = form.getTextField("Initiators Contact Information");
-        const initName = form.getTextField("Initiated by");
-        const eftCheck = form.getCheckBox("Check Box10");
-        clubName.setText("UBC Sprouts");
-        EFTNotifEmail.setText(invoice.email);
-        accCode.setText(invoice.accountCode.toString());
-        invoiceDate.setText(invoice.date);
-        dimension.setText("7064-00");
-        gstAmount.setText(invoice.gst.toString());
-        subtotal.setText(invoice.subtotal.toString());
-        total.setText(invoice.total.toString());
-        invNum.setText(invoice.invoiceNum.toString());
-        payableTo.setText(invoice.supplier);
-        paymentPurpose.setText(invoice.purpose);
-        initContactInfo.setText("treasurer@ubcsprouts.ca");
-        initName.setText(invoice.treasurerName);
-        amount.setText(invoice.subtotal.toString());
-        eftCheck.check();
-        const IPRBytes = await IPRFile.save();
-        const IPR = new InvoicePaymentRequisition(IPRBytes);
-        IPR.setInvoiceNum(invoice.invoiceNum.toString());
-        IPR.setSupplier(invoice.supplier);
-        return IPR;
+        try {
+            const pdfBytes = await fs.readFileSync("../../Invoice-Requisition-Form_Nov-2024_Fillable.pdf");
+            const IPRFile = await PDFDocument.load(pdfBytes);
+            IPRFile.removePage(1);
+            const form = IPRFile.getForm();
+                    // text 9 is department name
+                    // text 13 is EFT email payment notification
+            const clubName = form.getTextField("Text9");
+            const EFTNotifEmail = form.getTextField("Text13");
+            const invoiceDate = form.getTextField("Invoice Date");
+            const payableTo = form.getTextField("Payable to");
+            const accCode = form.getTextField("Account Code 5 digitsRow1");
+            const dimension = form.getTextField("Dimension 6 digitsRow1");
+            const amount = form.getTextField("AmountRow1");
+            const gstAmount = form.getTextField("GST Amount If Applicable000000");
+            const subtotal = form.getTextField("AmountSubtotal");
+            const total = form.getTextField("GST Amount If ApplicableTOTAL");
+            const invNum = form.getTextField("Invoice Number");
+            const paymentPurpose = form.getTextField("Purpose of payment");
+            const initContactInfo = form.getTextField("Initiators Contact Information");
+            const initName = form.getTextField("Initiated by");
+            const eftCheck = form.getCheckBox("Check Box10");
+            clubName.setText("UBC Sprouts");
+            EFTNotifEmail.setText(invoice.email);
+            if (invoice.accountCode !== null) {
+            accCode.setText(invoice.accountCode.toString());
+            }
+            invoiceDate.setText(invoice.date);
+            dimension.setText("7064-00");
+            // if (invoice.subtotal) {
+            // subtotal.setText(invoice.subtotal.toString());
+            // }
+            if (invoice.total !== null) {
+            total.setText(invoice.total.toString());
+            }
+            if (invoice.gst !== null) {
+            gstAmount.setText(invoice.gst.toString());
+            }
+            if (invoice.invoiceNum !== null) {
+            invNum.setText(invoice.invoiceNum.toString());
+            }
+            payableTo.setText(invoice.supplier);
+            paymentPurpose.setText(invoice.purpose);
+            initContactInfo.setText("treasurer@ubcsprouts.ca");
+            initName.setText(invoice.treasurerName);
+            if (invoice.subtotal) {
+                subtotal.setText(invoice.subtotal.toString());
+                amount.setText(invoice.subtotal.toString());
+            }
+            eftCheck.check();
+            const IPRBytes = await IPRFile.save();
+            const IPR = new InvoicePaymentRequisition(IPRBytes);
+            if (invoice.invoiceNum !== null) {
+                IPR.setInvoiceNum(invoice.invoiceNum.toString());
+            }
+            IPR.setSupplier(invoice.supplier);
+            return IPR;
+        } catch(e) {
+            console.log(e);
+            throw e;
+        }
     }
 
     async attachInvoice(): Promise<Uint8Array> {

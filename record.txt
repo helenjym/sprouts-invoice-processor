@@ -1,0 +1,12 @@
+wednesday dec 24
+----
+- refactored endpoints so that when a user calls upload, backend not only converts in into an invoice payment data structure but makes the
+  IPR and file, persists to disk, to be returned to the user, so that when donload/invoicenumber is called, a file is just being returned
+    - my logic for doing this: so backend validation can be solely done in the upload endpoint rather than having to do it across both /upload and /donload...idk tbh
+    - invoice number param in the endpoint is checked against a parallel json file that is made when upload last called
+- added validation in the frontend
+- added header that changes depending on the time YIPPEEEEE
+
+notes for tomorrow:
+- validate file to ensure it is a pdf and not some other file for security
+

@@ -1,0 +1,9 @@
+BACKEND
+----
+[] - validate file server-side
+[] - validate other form inputs server-side
+
+
+FRONTEND
+----
+[] - display error message when fetch response status is not 200

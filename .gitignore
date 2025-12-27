@@ -8,6 +8,8 @@
 # testing
 /coverage
 /invoices
+/src/rest/InvoicePayment.json
+/src/rest/IPR_Merged.pdf
 
 # production
 /build

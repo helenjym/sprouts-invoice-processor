@@ -16,6 +16,7 @@ function App() {
   const [fileLink, setFileLink] = useState(null);
   const [showInvNumChar, setshowInvNumChar] = useState(1);
   const [showInvoiceAmount, setShowGSTAmountInput] = useState(1);
+  const [err, setErr] = useState(null);
 
   // async function processInvoice(accCode, purpose, treasurerName, file) {
   //   const invoice = await InvoicePayment.createHorizonInvoice(accCode, purpose, treasurerName, file);
@@ -80,6 +81,7 @@ function App() {
 
   async function handleSubmit(e) {
     e.preventDefault();
+    setErr(null);
     console.log(accCode);
     const form = new FormData();
     form.append("supplierName", supplier);
@@ -98,17 +100,19 @@ function App() {
       body: form,
     });
     if (!uploadResponse.ok) {
+      setErr("Error occurred, please message Helen to troubleshoot!");
+      console.log(uploadResponse.statusText);
       throw new Error(`Response status: ${uploadResponse.status}`);
     }
 
     const downloadResponse = await fetch('http://localhost:3000/download/' + invoiceNum);
     if (!downloadResponse.ok) {
+      setErr("Error occurred, please message Helen to troubleshoot!");
+      console.log(downloadResponse.statusText);
       throw new Error(`Response status: ${downloadResponse.status}`);
     }
     const blob = await downloadResponse.blob();
-    // const data = blob.arrayBuffer().then((bytes) => {return bytes})
     const fileURL = URL.createObjectURL(blob);
-    console.log(fileURL);
     setFileLink(fileURL);
   }
 
@@ -137,8 +141,7 @@ function App() {
     <div className="App">
       <div className='lhs'>
         <GreetingHeader />
-        <form onSubmit={handleSubmit}> 
-          <p>Supplier</p>
+        <p>Supplier</p>
           <SupplierDropdown handleChange={handleSupplierChange}/>
           {supplier === "Other" && 
               <>
@@ -146,6 +149,7 @@ function App() {
               <input type="text"></input>
               </>
           }
+        <form onSubmit={handleSubmit}> 
           <p>Supplier email</p>
           <input required onChange={handleEmailChange}type='email'></input>
           <p>Invoice number</p>
@@ -178,6 +182,7 @@ function App() {
       </div>
       <div className='rhs'>
         <InvoicePreviewer data={fileLink}/>
+        {err !== null && <p>{err}</p>}
         <DownloadButton file={fileLink} supplier={supplier} invoiceNum={invoiceNum}/>
       </div>
     </div>
@@ -204,11 +209,45 @@ function SupplierDropdown({handleChange}) {
   );
 }
 
+function GeneralSupplierForm({handleSubmit}) {
+  <form onSubmit={handleSubmit}> 
+  <p>Supplier email</p>
+  <input required onChange={handleEmailChange}type='email'></input>
+  <p>Invoice number</p>
+  <input required onBeforeInput={beforeInputInvoiceCharHandler} onKeyDown={handleInvNumKeyChange} pattern="[0-9]*" maxLength="15" onChange={handleInvoiceNumChange} type='text'></input>
+  {!showInvNumChar && 
+    <p>Numbers, letters, or dashes only!</p>
+  }
+  <p>Invoice date</p>
+  <input onChange={handleInvoiceDate} type="date"></input>
+  <p>Total invoice amount</p>
+  <input required type='number' onChange={handleTotal}step='0.01'></input>
+  <p>GST amount</p>
+  <input type='number' onChange={handleGSTAmount} step='0.01'></input>
+  <p>Sub-account code</p>
+  <AccountDropdown handleChange={handleAccCode}/>
+  <p>Payment purpose</p>
+  <input required onChange={handlePurpose} maxLength="500" type='text'/> 
+  <p>Treasurer name</p>
+  <input required maxLength="500" onChange={handleName} type="text"></input>
+  <p>Upload invoice</p>
+  <input required onChange={handleFile} accept=".pdf" type="file"/>
+  {supplier === "Other" && 
+        <>
+          <p>Upload void cheque</p>
+          <FileUpload />
+        </>
+  }
+  <button>Generate</button>
+</form>
 
-function KnownSupplierForm() {
+}
+
+
+function ProcessableSupplierForm({handleSubmit}) {
 
   return (
-    <> 
+    <form onSubmit={handleSubmit}> 
       <p>Sub-account code</p>
       <AccountDropdown handleChange={handleAccCode}/>
       <p>Payment purpose</p>
@@ -218,7 +257,7 @@ function KnownSupplierForm() {
       <p>Upload invoice</p>
       <input required onChange={handleFile} accept=".pdf" type="file"/>
       <button>Generate</button>
-    </>
+    </form>
   );
 }
 function FileUpload() {

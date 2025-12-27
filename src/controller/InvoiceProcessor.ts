@@ -351,7 +351,7 @@ class InvoicePaymentRequisition {
 
     static async create(invoice: InvoicePayment): Promise<InvoicePaymentRequisition> {
         try {
-            const pdfBytes = await fs.readFileSync("../../Invoice-Requisition-Form_Nov-2024_Fillable.pdf");
+            const pdfBytes = await fs.readFileSync("../Invoice-Requisition-Form_Nov-2024_Fillable.pdf");
             const IPRFile = await PDFDocument.load(pdfBytes);
             IPRFile.removePage(1);
             const form = IPRFile.getForm();
@@ -414,7 +414,7 @@ class InvoicePaymentRequisition {
     }
 
     async attachInvoice(): Promise<Uint8Array> {
-        const pdfBytes = await fs.readFileSync("../../uploads/Invoice.pdf");
+        const pdfBytes = await fs.readFileSync("../uploads/Invoice.pdf");
         const IPRFile = await PDFDocument.load(this.File);
         const invoiceDoc = await PDFDocument.load(pdfBytes);
         const numInvoicePages = invoiceDoc.getPageCount();

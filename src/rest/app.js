@@ -7,7 +7,7 @@ const { InvoicePayment, InvoicePaymentRequisition } = require( '../controller/In
 const fs = require('fs'); 
 // Changing filename to be the same for every uplffoad--any existing file gets replaced
 const storage=multer.diskStorage({
-    destination:(req,file,cb)=>cb(null,'../../uploads'),
+    destination:(req,file,cb)=>cb(null,'../uploads'),
     filename:(req,file,cb)=>cb(null,'Invoice.pdf')
 });
 // validate file
@@ -20,7 +20,7 @@ app.get('/invoice', (req, res) => {
     res.send("Hello");
 });
 
-app.post('/upload', upload.single('invoice'), (req, res) => {
+app.post('/upload', upload.single('invoice'), async (req, res) => {
     console.log(req.body, req.file)
     const invoiceNum = Number(req.body.invoiceNum);
     const gst = Number(req.body.gst);
@@ -28,16 +28,14 @@ app.post('/upload', upload.single('invoice'), (req, res) => {
     const accCode = Number(req.body.accCode);
     try {
         const invoicePayment = InvoicePayment.createGeneralInvoice(req.body.supplierName, invoiceNum, req.body.date, gst, total, req.body.email, accCode, req.body.purpose, req.body.treasurerName);
-        InvoicePaymentRequisition.create(invoicePayment).then((IPR) => {
-                IPR.attachInvoice().then((bytes) => {
-                    fs.writeFileSync("IPR_Merged.pdf", bytes, 'utf-8');
-                })
-            }
-        )
+        const IPR = await InvoicePaymentRequisition.create(invoicePayment)
+        const bytes = await IPR.attachInvoice();
+        fs.writeFileSync("IPR_Merged.pdf", bytes, 'utf-8');
         const jsonData = JSON.stringify(invoicePayment);
         fs.writeFileSync("InvoicePayment.json", jsonData, 'utf-8');
-        res.send("Upload successful");
+        res.status(200).send("Upload successful");
     } catch(e) {
+        console.log(e);
         res.status(500).send("Error occurred while uploading");
     }
 });

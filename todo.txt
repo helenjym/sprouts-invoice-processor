@@ -1,9 +1,12 @@
 BACKEND
 ----
 [] - validate file server-side
+[] - check for existence of file server-side
 [] - validate other form inputs server-side
+[] - make list of suppliers json that dropdowns can reference
 
 
 FRONTEND
 ----
 [] - display error message when fetch response status is not 200
+[] - design

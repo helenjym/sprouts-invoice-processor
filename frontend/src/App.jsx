@@ -1,8 +1,8 @@
 import './App.css';
 import { useState } from 'react';
 
-function App() {
 
+function App() {
   const [supplier, setSupplier] = useState(null);
   const [accCode, setAccCode] = useState(null);
   const [date, setDate] = useState(null);
@@ -17,6 +17,7 @@ function App() {
   const [showInvNumChar, setshowInvNumChar] = useState(1);
   const [showInvoiceAmount, setShowGSTAmountInput] = useState(1);
   const [err, setErr] = useState(null);
+
 
   // async function processInvoice(accCode, purpose, treasurerName, file) {
   //   const invoice = await InvoicePayment.createHorizonInvoice(accCode, purpose, treasurerName, file);
@@ -79,26 +80,23 @@ function App() {
     setFile(e.target.files[0]);
   }
 
-  async function handleSubmit(e) {
+  async function handleProcessableSubmit(e) {
     e.preventDefault();
     setErr(null);
     console.log(accCode);
     const form = new FormData();
-    form.append("supplierName", supplier);
-    form.append("invoiceNum", invoiceNum);
-    form.append("date", date);
-    form.append("gst", gst);
-    form.append("total", total);
-    form.append("email", email);
+    const supplierName = supplier;
     form.append("accCode", accCode);
     form.append("purpose", purpose);
     form.append("treasurerName", name);
     form.append("invoice", file);
+    try {
     // handle errors
-    const uploadResponse = await fetch('http://localhost:3000/upload', {
+    const uploadResponse = await fetch('http://localhost:3000/upload/' + supplierName, {
       method: "POST",
       body: form,
     });
+
     if (!uploadResponse.ok) {
       setErr("Error occurred, please message Helen to troubleshoot!");
       console.log(uploadResponse.statusText);
@@ -114,6 +112,9 @@ function App() {
     const blob = await downloadResponse.blob();
     const fileURL = URL.createObjectURL(blob);
     setFileLink(fileURL);
+  } catch (e) {
+    console.log(e);
+  }
   }
 
   function handleInvNumKeyChange(e) {
@@ -137,6 +138,49 @@ function App() {
   }
 
 
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setErr(null);
+    console.log(accCode);
+    const form = new FormData();
+    form.append("supplierName", supplier);
+    form.append("invoiceNum", invoiceNum);
+    form.append("date", date);
+    form.append("gst", gst);
+    form.append("total", total);
+    form.append("email", email);
+    form.append("accCode", accCode);
+    form.append("purpose", purpose);
+    form.append("treasurerName", name);
+    form.append("invoice", file);
+    try {
+    // handle errors
+    const uploadResponse = await fetch('http://localhost:3000/upload', {
+      method: "POST",
+      body: form,
+    });
+    if (!uploadResponse.ok) {
+      setErr("Error occurred, please message Helen to troubleshoot!");
+      console.log(uploadResponse.statusText);
+      throw new Error(`Response status: ${uploadResponse.status}`);
+    }
+
+    const downloadResponse = await fetch('http://localhost:3000/download/' + invoiceNum);
+    if (!downloadResponse.ok) {
+      setErr("Error occurred, please message Helen to troubleshoot!");
+      console.log(downloadResponse.statusText);
+      throw new Error(`Response status: ${downloadResponse.status}`);
+    }
+    const blob = await downloadResponse.blob();
+    const fileURL = URL.createObjectURL(blob);
+    setFileLink(fileURL);
+  } catch(e) {
+    console.log(e);
+  }
+  }
+
+
+
   return (
     <div className="App">
       <div className='lhs'>
@@ -149,7 +193,11 @@ function App() {
               <input type="text"></input>
               </>
           }
-        <form onSubmit={handleSubmit}> 
+        {(supplier === "Horizon") ?
+          <ProcessableSupplierForm supplier={supplier}/> :
+          <p>hi</p>
+        }
+        {/* <form onSubmit={handleSubmit}> 
           <p>Supplier email</p>
           <input required onChange={handleEmailChange}type='email'></input>
           <p>Invoice number</p>
@@ -178,13 +226,13 @@ function App() {
                 </>
           }
           <button>Generate</button>
-        </form>
+        </form> */}
       </div>
-      <div className='rhs'>
+      {/* <div className='rhs'>
         <InvoicePreviewer data={fileLink}/>
         {err !== null && <p>{err}</p>}
         <DownloadButton file={fileLink} supplier={supplier} invoiceNum={invoiceNum}/>
-      </div>
+      </div> */}
     </div>
   );
 }
@@ -210,44 +258,87 @@ function SupplierDropdown({handleChange}) {
 }
 
 function GeneralSupplierForm({handleSubmit}) {
-  <form onSubmit={handleSubmit}> 
-  <p>Supplier email</p>
-  <input required onChange={handleEmailChange}type='email'></input>
-  <p>Invoice number</p>
-  <input required onBeforeInput={beforeInputInvoiceCharHandler} onKeyDown={handleInvNumKeyChange} pattern="[0-9]*" maxLength="15" onChange={handleInvoiceNumChange} type='text'></input>
-  {!showInvNumChar && 
-    <p>Numbers, letters, or dashes only!</p>
+  function handleSupplierNameChange(e) {
+    setSupplier(e.target.value);
   }
-  <p>Invoice date</p>
-  <input onChange={handleInvoiceDate} type="date"></input>
-  <p>Total invoice amount</p>
-  <input required type='number' onChange={handleTotal}step='0.01'></input>
-  <p>GST amount</p>
-  <input type='number' onChange={handleGSTAmount} step='0.01'></input>
-  <p>Sub-account code</p>
-  <AccountDropdown handleChange={handleAccCode}/>
-  <p>Payment purpose</p>
-  <input required onChange={handlePurpose} maxLength="500" type='text'/> 
-  <p>Treasurer name</p>
-  <input required maxLength="500" onChange={handleName} type="text"></input>
-  <p>Upload invoice</p>
-  <input required onChange={handleFile} accept=".pdf" type="file"/>
-  {supplier === "Other" && 
-        <>
-          <p>Upload void cheque</p>
-          <FileUpload />
-        </>
+
+
+  function handleEmailChange(e) {
+    setEmail(e.target.value);
   }
-  <button>Generate</button>
-</form>
 
-}
+  function handleInvoiceNumChange(e) {
+    setInvoiceNum(e.target.value);
+  }
 
+  function handleInvoiceDate(e) {
+    setDate(e.target.value);
+  }
 
-function ProcessableSupplierForm({handleSubmit}) {
+  function handleTotal(e) {
+    setTotal(e.target.value);
+  }
+
+  function handleGSTAmount(e) {
+    setGST(e.target.value);
+  }
+
+  function handleAccCode(e) {
+    if (e.target.value !== "") {
+      const accCode = e.target.value;
+      setAccCode(accCode);  
+    } else {
+      setAccCode(null);
+    }
+  }
+
+  function handlePurpose(e) {
+    setPurpose(e.target.value);
+  }
+
+  function handleName(e) {
+    setName(e.target.value);
+  }
+
+  function handleFile(e) {
+    setFile(e.target.files[0]);
+  }
+
+  function handleInvNumKeyChange(e) {
+    console.log(e.key);
+    const existing = e.target.value;
+    // e.preventDefault();
+    const pattern = /^[a-zA-Z0-9-]/;
+    const key = e.key;
+    const match = pattern.test(key);
+    if (!match && (key !== "Backspace") && (key !== "Enter")) {
+      setshowInvNumChar(0);
+    } else {
+      setshowInvNumChar(1);
+    }
+  }
+  function beforeInputInvoiceCharHandler(e) {
+    if (!showInvNumChar) {
+      e.preventDefault();
+      // showInvNumChar = 1;
+    }
+  }
 
   return (
     <form onSubmit={handleSubmit}> 
+      <p>Supplier email</p>
+      <input required onChange={handleEmailChange}type='email'></input>
+      <p>Invoice number</p>
+      <input required onBeforeInput={beforeInputInvoiceCharHandler} onKeyDown={handleInvNumKeyChange} pattern="[0-9]*" maxLength="15" onChange={handleInvoiceNumChange} type='text'></input>
+      {!showInvNumChar && 
+        <p>Numbers, letters, or dashes only!</p>
+      }
+      <p>Invoice date</p>
+      <input onChange={handleInvoiceDate} type="date"></input>
+      <p>Total invoice amount</p>
+      <input required type='number' onChange={handleTotal}step='0.01'></input>
+      <p>GST amount</p>
+      <input type='number' onChange={handleGSTAmount} step='0.01'></input>
       <p>Sub-account code</p>
       <AccountDropdown handleChange={handleAccCode}/>
       <p>Payment purpose</p>
@@ -256,10 +347,109 @@ function ProcessableSupplierForm({handleSubmit}) {
       <input required maxLength="500" onChange={handleName} type="text"></input>
       <p>Upload invoice</p>
       <input required onChange={handleFile} accept=".pdf" type="file"/>
+      {supplier === "Other" && 
+            <>
+              <p>Upload void cheque</p>
+              <FileUpload />
+            </>
+      }
       <button>Generate</button>
     </form>
   );
 }
+
+
+function ProcessableSupplierForm({supplier}) {
+
+  const [accCode, setAccCode] = useState(null);
+  const [name, setName] = useState(null);
+  const [purpose, setPurpose] = useState(null);
+  const [file, setFile] = useState(null);
+  const [fileLink, setFileLink] = useState(null);
+  const [err, setErr] = useState(null);
+  const [invoiceNum, setInvoiceNum] = useState(null)
+
+  async function handleProcessableSubmit(e) {
+    e.preventDefault();
+    setErr(null);
+    console.log(accCode);
+    const form = new FormData();
+    const supplierName = supplier;
+    form.append("accCode", accCode);
+    form.append("purpose", purpose);
+    form.append("treasurerName", name);
+    form.append("invoice", file);
+    // handle errors
+    const uploadResponse = await fetch('http://localhost:3000/upload/' + supplierName, {
+      method: "POST",
+      body: form,
+    });
+    if (!uploadResponse.ok) {
+      setErr("Error occurred!");
+      console.log(uploadResponse.statusText);
+      throw new Error(`Response status: ${uploadResponse.status}`);
+    } else {
+      const response = await uploadResponse.text();
+      console.log(response);
+      setInvoiceNum(response);
+    }
+    const downloadResponse = await fetch('http://localhost:3000/download/' + invoiceNum);
+    if (!downloadResponse.ok) {
+      setErr("Error occurred!");
+      console.log(downloadResponse.statusText);
+      throw new Error(`Response status: ${downloadResponse.status}`);
+    }
+    const blob = await downloadResponse.blob();
+    const fileURL = URL.createObjectURL(blob);
+    setFileLink(fileURL);
+  }
+
+
+  function handleAccCode(e) {
+    if (e.target.value !== "") {
+      const accCode = e.target.value;
+      setAccCode(accCode);  
+    } else {
+      setAccCode(null);
+    }
+  }
+
+  function handlePurpose(e) {
+    console.log(e.target.value);
+    setPurpose(e.target.value);
+  }
+
+  function handleName(e) {
+    setName(e.target.value);
+  }
+
+  function handleFile(e) {
+    setFile(e.target.files[0]);
+  }
+
+
+  return (
+    <>
+      <form onSubmit={handleProcessableSubmit}> 
+        <p>Sub-account code</p>
+        <AccountDropdown handleChange={handleAccCode}/>
+        <p>Payment purpose</p>
+        <input required onChange={handlePurpose} maxLength="500" type='text'/> 
+        <p>Treasurer name</p>
+        <input required maxLength="500" onChange={handleName} type="text"></input>
+        <p>Upload invoice</p>
+        <input required onChange={handleFile} accept=".pdf" type="file"/>
+        <button>Generate</button>
+      </form>
+      <div className='rhs'>
+        <InvoicePreviewer data={fileLink}/>
+        {err !== null && <p>{err}</p>}
+        <DownloadButton file={fileLink} supplier={supplier} invoiceNum={invoiceNum}/>
+      </div>
+    </>
+  );
+}
+
 function FileUpload() {
   return(
     <input type="file"/>

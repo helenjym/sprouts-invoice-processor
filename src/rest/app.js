@@ -40,6 +40,24 @@ app.post('/upload', upload.single('invoice'), async (req, res) => {
     }
 });
 
+app.post('/upload/Horizon', upload.single('invoice'), async (req, res) => {
+    console.log(req.body, req.file)
+    const accCode = Number(req.body.accCode);
+    try {
+        const invoicePayment = await InvoicePayment.createHorizonInvoice(accCode, req.body.purpose, req.body.treasurerName);
+        console.log(invoicePayment);
+        const IPR = await InvoicePaymentRequisition.create(invoicePayment)
+        const bytes = await IPR.attachInvoice();
+        fs.writeFileSync("IPR_Merged.pdf", bytes, 'utf-8');
+        const jsonData = JSON.stringify(invoicePayment);
+        fs.writeFileSync("InvoicePayment.json", jsonData, 'utf-8');
+        res.status(200).send(invoicePayment.invoiceNum);
+    } catch(e) {
+        console.log(e);
+        res.status(500).send("Error occurred while uploading");
+    }
+});
+
 app.get('/download/:iv', (req, res) => {
     try {
         const invoiceFile = fs.readFileSync("./InvoicePayment.json", "utf-8");

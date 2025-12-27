@@ -73,10 +73,10 @@ class InvoicePayment {
         return invoice;
     }
 
-    static async createHorizonInvoice(accCode: number, purpose: string, treasurerName: string, file: string): Promise<InvoicePayment> { 
+    static async createHorizonInvoice(accCode: number, purpose: string, treasurerName: string): Promise<InvoicePayment> { 
         const invoice = new InvoicePayment();
         // error handling
-        const invoiceFile = await fs.readFileSync("../../uploads/Invoice.pdf");
+        const invoiceFile = await fs.readFileSync("../uploads/Invoice.pdf");
         const parser = new PDFParse({data: invoiceFile});
 
         const result = await parser.getText();

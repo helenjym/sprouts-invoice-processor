@@ -10,3 +10,16 @@ wednesday dec 24
 notes for tomorrow:
 - validate file to ensure it is a pdf and not some other file for security
 
+friday dec 26
+----
+- refactored POST endpoint to use async/await instead of then because of a bug of file n to disc after needing it ?!
+- implemented new form component that connects to Horizon invoice parsing functionality through a new api endpoint 
+  /upload/Horizon, extensions to other invoices I implement parsing for can be done through
+  this component
+  - still have to validate inputs for backend
+
+notes for tomorrow
+- fix form for manual invoice submission form
+- fix component structure
+- finally start on UI
+

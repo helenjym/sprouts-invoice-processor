@@ -1,12 +1,33 @@
 BACKEND
 ----
-[] - validate file server-side
-[] - check for existence of file server-side
-[] - validate other form inputs server-side
-[] - make list of suppliers json that dropdowns can reference
+[] - validate form inputs server-side
+    [] - validate file server-side
+    [] - check for existence of file server-side
+[] - add void cheque processing
+
+[X] - make list of suppliers json that dropdowns can reference
 
 
 FRONTEND
 ----
-[] - display error message when fetch response status is not 200
-[] - design
+[] - basic layout
+[] - loading graphics
+
+[X] - display error message when fetch response status is not 200
+[X] - fetch suppliers data on page load
+[X] - implement error/unexpected behaviour handling on file download
+
+
+
+FUTURE FEATURES
+- settings tab where user can:
+    - add a new known supplier or edit existing
+      and edit or add accounts
+    - submit complaint to me lol
+- invoice signing
+- invoice parsing for other known suppliers
+
+
+
+CURRENT BUGS:
+- always fetching suppliers twice / rendering twice

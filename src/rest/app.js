@@ -33,7 +33,7 @@ app.post('/upload', upload.single('invoice'), async (req, res) => {
         fs.writeFileSync("IPR_Merged.pdf", bytes, 'utf-8');
         const jsonData = JSON.stringify(invoicePayment);
         fs.writeFileSync("InvoicePayment.json", jsonData, 'utf-8');
-        res.status(200).send("Upload successful");
+        res.status(200).send("Upload succesful");
     } catch(e) {
         console.log(e);
         res.status(500).send("Error occurred while uploading");
@@ -45,13 +45,18 @@ app.post('/upload/Horizon', upload.single('invoice'), async (req, res) => {
     const accCode = Number(req.body.accCode);
     try {
         const invoicePayment = await InvoicePayment.createHorizonInvoice(accCode, req.body.purpose, req.body.treasurerName);
-        console.log(invoicePayment);
-        const IPR = await InvoicePaymentRequisition.create(invoicePayment)
-        const bytes = await IPR.attachInvoice();
-        fs.writeFileSync("IPR_Merged.pdf", bytes, 'utf-8');
-        const jsonData = JSON.stringify(invoicePayment);
-        fs.writeFileSync("InvoicePayment.json", jsonData, 'utf-8');
-        res.status(200).send(invoicePayment.invoiceNum);
+        console.log(invoicePayment)
+        if (isNaN(invoicePayment.invoiceNum)) {
+            res.status(500).send("Error occurred while uploading");
+        } else {
+            console.log(invoicePayment);
+            const IPR = await InvoicePaymentRequisition.create(invoicePayment);
+            const bytes = await IPR.attachInvoice();
+            fs.writeFileSync("IPR_Merged.pdf", bytes, 'utf-8');
+            const jsonData = JSON.stringify(invoicePayment);
+            fs.writeFileSync("InvoicePayment.json", jsonData, 'utf-8');
+            res.status(200).send(invoicePayment.invoiceNum);
+        }
     } catch(e) {
         console.log(e);
         res.status(500).send("Error occurred while uploading");
@@ -76,24 +81,18 @@ app.get('/download/:iv', (req, res) => {
         res.status(500).send("Error occurred while downloading");
     }
 });
-    // console.log(req.body, req.file)
-    // const invoiceNum = Number(req.body.invoiceNum);
-    // const gst = Number(req.body.gst);
-    // const total = Number(req.body.total);
-    // const accCode = Number(req.body.accCode);
-    // const invoicePayment = InvoicePayment.createGeneralInvoice(req.body.supplierName, invoiceNum, req.body.date, gst, total, req.body.email, accCode, req.body.purpose, req.body.treasurerName);
-    // const data = InvoicePaymentRequisition.create(invoicePayment).then((IPR) => {
-    // IPR.attachInvoice().then((bytes) => {
-    //     return bytes;})
-    // });
-    // res.writeHead(200, {
-    // 'Content-Length': Buffer.byteLength(data),
-    // 'Content-Type': 'application/pdf',
-    // });
-    // res.write(data, 'utf8', () => {
-    //     console.log("Lol");
-    // });
-    // res.end();
+
+app.get('/suppliers', (req, res) => {
+    try {
+        const suppliersFile = fs.readFileSync('../suppliers.json', "utf-8");
+        // returns a utf-8 character encoding of the json file
+        const suppliers = JSON.parse(suppliersFile);
+        res.json(suppliers);
+    } catch(e) {
+        console.log(e);
+        res.status(500).send("Error occurred");
+    }
+})
 
 app.listen(port, () => {
     console.log(`App listening on port ${port}`);

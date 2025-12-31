@@ -1,3 +1,6 @@
+before:
+- trying to implement functionality wo a backend server
+
 wednesday dec 24
 ----
 - refactored endpoints so that when a user calls upload, backend not only converts in into an invoice payment data structure but makes the
@@ -23,3 +26,18 @@ notes for tomorrow
 - fix component structure
 - finally start on UI
 
+tuesday dec 30
+----
+- implemented storing of known supplier info in the backend (currently just name and email)
+  frontend makes request to backend for this info on page load (doesn't necessarily have to make this call all the time? idk)
+  to display in supplier dropdown
+  - why? so known supplier email is automatically filled out and
+    so known suppliers (suppliers for which the AMS has EFT info for) can be
+    updated and managed in the backend wo the frontend having to care
+  - currently using useEffect to get data, is this a good method?
+
+
+
+  
+
+e

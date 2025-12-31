@@ -40,3 +40,63 @@
 .read-the-docs {
   color: #888;
 }
+
+.form {
+  display: flex;
+}
+
+#supplier-dropdown {
+  text-align: left;
+}
+
+.lhs {
+  text-align: left;
+  margin-right: 100px;
+}
+
+.rhs {
+  text-align: center;
+}
+
+.generate-btn {
+  display: block;
+  margin-top: 30px;
+}
+
+.form-subsection {
+  display: flex;
+}
+
+.download {
+  display: block;
+  margin-top: 30px;
+}
+
+.col1 {
+  width: 200px;
+  margin-right: 20px;
+}
+.col2 {
+  width: 200px;
+}
+
+input {
+  width: 100%;
+}
+
+#payment-purpose {
+  height: 50px;
+}
+
+select {
+  padding: 5px;
+  border-radius: 1px;
+}
+
+.previewer {
+  height: 500px;
+  width: 400px;
+  border-width: 1px;
+  border-style: solid;
+}
+

@@ -424,26 +424,7 @@ class InvoicePaymentRequisition {
         }
         const attachInvoiceFileBytes = await IPRFile.save();
         return attachInvoiceFileBytes;
-
-        // const pdfSavedBytes = await this.File.save();
-        // fs.writeFile(invoiceFile + '_Merged.pdf', pdfSavedBytes, 'utf8', (err) => {
-        //     if (err) {
-        //         console.error('Error writing file:', err);
-        //         return;
-        //     }
-        //         console.log('IPR file written successfully!');
-        // });     
     }
-
-    // async download(bytes: Uint8Array) {      
-    //     fs.writeFile(this.invoiceNum + "_" + this.supplier + "_Merged.pdf", bytes, 'utf8', (err) => {
-    //     if (err) {
-    //         console.error('Error writing file:', err);
-    //         return;
-    //     }
-    //         console.log('IPR file written successfully!');
-    //     }); 
-    // }
 }
 
 // InvoicePayment.createHorizonInvoice(60015, "purchases", "Helen", "bob").then((data) => console.log(data));

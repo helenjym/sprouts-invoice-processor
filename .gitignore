@@ -7,6 +7,10 @@
 
 # testing
 /coverage
+/invoices
+/src/rest/InvoicePayment.json
+/src/rest/IPR_Merged.pdf
+/src/rest/VoidCheque.pdf
 
 # production
 /build

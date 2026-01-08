@@ -1,21 +1,24 @@
 BACKEND
 ----
-[] - validate form inputs server-side
-    [] - validate file server-side
-    [] - check for existence of file server-side
 [] - add void cheque processing
+[] - server-side validation for other endpoint
+[] - have Horizon processing also get 'product gst' field to subtract
 
 [X] - make list of suppliers json that dropdowns can reference
 
 
 FRONTEND
 ----
-[] - basic layout
 [] - loading graphics
+[] - frontend file validation
+[] - hover note that invoice must not be a scan
+[] - implement error/unexpected behaviour handling on file download
+[] - change -2 
 
+[X] - basic layout
 [X] - display error message when fetch response status is not 200
 [X] - fetch suppliers data on page load
-[X] - implement error/unexpected behaviour handling on file download
+
 
 
 
@@ -23,7 +26,7 @@ FUTURE FEATURES
 - settings tab where user can:
     - add a new known supplier or edit existing
       and edit or add accounts
-    - submit complaint to me lol
+    - submit complaint/bug report to me thru email
 - invoice signing
 - invoice parsing for other known suppliers
 
@@ -31,3 +34,8 @@ FUTURE FEATURES
 
 CURRENT BUGS:
 - always fetching suppliers twice / rendering twice
+
+
+[] - night button toggle
+[] - void cheque form upload
+[] - clear button

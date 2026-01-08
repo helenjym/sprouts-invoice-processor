@@ -37,7 +37,35 @@ tuesday dec 30
   - currently using useEffect to get data, is this a good method?
 
 
-
+saturday, jan 3
+----
+- finished adding server side validation for /upload endpoint
+  - checked text inputs for valid characters and non-empty
+  - checked file for being under 5 MB and having the magic signature
+    of a pdf
+      - the thing is, i only validate after it gets uploaded to disk...is that secure?
+      - using express-validator to help with non-file inptu validation, it returns an
+        errors array which is helpful to give info to client..but this may not be a necessary dependency?
   
+questions:
+- can i do this all without a server !?!?!
+- pdf-parse works on the web but react?
+- what are the dangers of doing uploading/downloading over the internet
+- HOW does React work exactly ?!?!!??!?
 
-e
+tomorrow:
+- frontend validation
+- style Horizon form + do backend validation
+- draw background for evening hehe
+
+monday:
+- extend parsing to other suppliers
+
+monday, jan 5
+- changed invoiceNum to string
+- validated file received from /download/:iv endpoint
+  - checked file for being under 5 MB and having the magic signature
+    of a pdf
+- download button component is conditional on whether user has
+  ever submitted the form succesfully before (on page open, it will not download anything if clicked)
+

@@ -1,11 +1,15 @@
 import { useEffect } from 'react';
 import './App.css';
 import { useState } from 'react';
+import './ThemeOption.jsx'
 
 
 function App() {
   const [supplier, setSupplier] = useState("");
   const [suppliers, setSuppliers] = useState([]);
+  const [connectionError, setConnectionError] = useState(false);
+  const [theme, setTheme] = useState("day");
+
 
   useEffect(() => {
     fetchData();
@@ -16,34 +20,54 @@ function App() {
       const response = await fetch('http://localhost:3000/suppliers');
       const suppliersObj = await response.json();
       setSuppliers(suppliersObj);
+      setConnectionError(false);
     } catch(e) {
-      alert("Connection to server failed, please try again later!")
+      setConnectionError(true);
       console.log(e);
     }
   }
 
   function handleSupplierChange(e) {
-    if (e.target.value === "" || e.target.value == "-2") {
+    if (e.target.value === "" || e.target.value == "Other") {
       setSupplier(e.target.value);
     } else {
       const supplierIndex = e.target.value;
       const supplier = suppliers[supplierIndex];
+      console.log(supplier.name);
       setSupplier(supplier);
-      console.log(supplier);
+    }
+  }
+  function handleTheme() {
+    console.log("toggling theme");
+    if (theme === "day") {
+      console.log("light->dark");
+      document.querySelector('body').setAttribute('data-theme', 'dark');
+      setTheme("night");
+    } else if (theme === "night") {
+      console.log("dark->light");
+      document.querySelector('body').setAttribute('data-theme', 'light');
+      setTheme("day");
     }
   }
 
+
   return (
     <div className="App">
+        <div onClick={handleTheme} className='theme-option'><p>{(theme === "day") ?"night mode" : "day mode"}</p></div>
+        {connectionError && <p className="connectionErrMessage">Connection to server failed :( please try again later</p>}
         <GreetingHeader />
-        <div id="supplier-dropdown">
-          <p>Supplier</p>
-          <SupplierDropdown handleChange={handleSupplierChange} suppliers={suppliers}/>
+        <div className="content">
+          {/* <p id="form-header">Enter invoice details</p> */}
+          <div id="supplier-dropdown">
+            <label className="supplierDropdownLabel" htmlFor='supplierDropdown'>Supplier</label>
+            <SupplierDropdown handleChange={handleSupplierChange} suppliers={suppliers}/>
+            {/* {supplierErr && <p className="error-message">Please choose a supplier</p>} */}
+          </div>
+          {(supplier.name === "Horizon") ?
+            <ProcessableSupplierForm supplier={supplier}/> :
+            <GeneralSupplierForm supplier={supplier}/>
+          }
         </div>
-        {(supplier != null && supplier.name === "Horizon") ?
-          <ProcessableSupplierForm supplier={supplier}/> :
-          <GeneralSupplierForm supplier={supplier}/>
-        }
     </div>
   );i
 }
@@ -61,11 +85,11 @@ function SupplierDropdown({handleChange, suppliers}) {
 
   return (
     <div>
-      <select required onChange={handleChange}>
+      <select name='supplierDropdown' required onChange={handleChange}>
         {/* weird values are set here lol */}
-        <option value="">Select a supplier</option>
+        <option value=""></option>
         {suppliersOptions}
-        <option value={-2}>Other</option>
+        <option value="Other">Other</option>
       </select>
     </div>
   );
@@ -77,14 +101,16 @@ function GeneralSupplierForm({supplier}) {
   const [gst, setGST] = useState(0.00);
   const [total, setTotal] = useState(null);
   const [email, setEmail] = useState(null);
-  const [name, setName] = useState(null);
+  const [treasurerName, setTreasurerName] = useState(null);
   const [purpose, setPurpose] = useState(null);
   const [invoiceNum, setInvoiceNum] = useState(null);
-  const [file, setFile] = useState(null);
+  const [invoice, setInvoice] = useState(null);
+  const [voidCheque, setVoidCheque] = useState(null);
   const [showInvNumChar, setshowInvNumChar] = useState(1);
   const [err, setErr] = useState(null);
-  const [fileLink, setFileLink] = useState(null);
+  const [fileLink, setFileLink] = useState("src/previewerDefault.html");
   const [supplierName, setSupplierName] = useState(null);
+  
 
   function handleEmailChange(e) {
     setEmail(e.target.value);
@@ -92,7 +118,6 @@ function GeneralSupplierForm({supplier}) {
 
   function handleInvoiceNumChange(e) {
     setInvoiceNum(e.target.value);
-    console.log(invoiceNum);
 
   }
 
@@ -122,17 +147,18 @@ function GeneralSupplierForm({supplier}) {
   }
 
   function handleName(e) {
-    setName(e.target.value);
+    setTreasurerName(e.target.value);
   }
 
-  function handleFile(e) {
-    setFile(e.target.files[0]);
+  function handleInvoice(e) {
+    setInvoice(e.target.files[0]);
+  }
+
+  function handleVoidCheque(e) {
+    setVoidCheque(e.target.files[0]);
   }
 
   function handleInvNumKeyDown(e) {
-    console.log(e.key);
-    const existing = e.target.value;
-    // e.preventDefault();
     const pattern = /^[a-zA-Z0-9-]/;
     const key = e.key;
     const match = pattern.test(key);
@@ -145,24 +171,66 @@ function GeneralSupplierForm({supplier}) {
   function beforeInputInvoiceCharHandler(e) {
     if (!showInvNumChar) {
       e.preventDefault();
-      // showInvNumChar = 1;
     }
   }
+  async function validateFile(blob) {
+    if (blob.size > 5*1024*1024) {
+      console.log("File in response is too large")
+      return false;
+    }
+      const arrayBuffer = await blob.arrayBuffer();
+      const bytes = new Uint8Array(arrayBuffer);      
+      const signatureBytes = bytes.slice(0, 5);
+      const signature = signatureBytes.toHex().toUpperCase();
+      console.log(signature);
+      const PDFsignature = '255044462D';
+      const isValid = (signature === PDFsignature);
+      if (!isValid) {
+        console.log("File in response is not a PDF")
+      }
+      return isValid;
+
+  }
+
+  // function validateSubmit(){
+
+  //   if (invoiceNum === null) {
+  //     // show error message: "Field is required"
+  //   }
+  //   if (total === null) {
+  //     // show error message: "Field is required"
+  //   }
+
+  //   if (gst === null) {
+  //     // show error message: "Field is required"
+  //   }
+
+  //   if (purpose === null) {
+  //       // show error message: "Field is required"
+  //   }
+  //   if (treasurerName === null) {
+  //     // show error message: "Field is required"
+  // }
+
+  //   if (accCode === "") {
+  //     // show error message "Please choose an account"
+  //   }
+
+  // }
 
   async function handleSubmit(e) {
     e.preventDefault();
     console.log(supplier);
-    if (supplier == "") {
-      alert("Please choose a supplier")
+    if (supplier === "") {
+      return alert("Please choose a supplier")
     } else {
       setErr(null);
-      console.log(accCode);
       const form = new FormData();
       form.append("invoiceNum", invoiceNum);
       form.append("date", date);
       form.append("gst", gst);
       form.append("total", total);
-      if (supplier == "" || supplier == "-2") {
+      if (supplier == "Other") {
         form.append("supplierName", supplierName);
         form.append("email", email);
       } else {
@@ -171,30 +239,38 @@ function GeneralSupplierForm({supplier}) {
       }
       form.append("accCode", accCode);
       form.append("purpose", purpose);
-      form.append("treasurerName", name);
-      form.append("invoice", file);
+      form.append("treasurerName", treasurerName);
+      form.append("invoice", invoice);
+      if (voidCheque !== null && supplier === "Other") {
+        form.append("voidCheque", voidCheque);
+      }
       try {
         const uploadResponse = await fetch('http://localhost:3000/upload', {
           method: "POST",
           body: form,
         });
-        const uploadResponseText = await uploadResponse.text();
         if (!uploadResponse.ok) {
+          const uploadResponseText = await uploadResponse.text();
           console.log(uploadResponseText);
-          throw new Error(`Response status: ${uploadResponse.status}`);
+          throw new Error("File upload error");
         }
         const downloadResponse = await fetch('http://localhost:3000/download/' + invoiceNum);
         if (!downloadResponse.ok) {
           const downloadResponseText = await downloadResponse.text();
-          console.log(downloadResponseText);
-          throw new Error(`Response status: ${downloadResponse.status}`);
+          console.log(downloadResponseText);  
+          throw new Error("File download error");
         }
         const blob = await downloadResponse.blob();
+        const validFile = await validateFile(blob);
+        if (!validFile) {
+          throw new Error("File download error");
+        }
         const fileURL = URL.createObjectURL(blob);
         setFileLink(fileURL);
       } catch(e) {
-        setErr("Error occurred, please try again later!");
+        setErr("Error occurred: " + e.message);
         console.log(e);
+        return;
       }
     }
   }
@@ -205,58 +281,76 @@ function GeneralSupplierForm({supplier}) {
       {/* change name of this div? */}
       <div className="lhs">
         <form onSubmit={handleSubmit}> 
-          {supplier == "-2" && 
+          {supplier == "Other" && 
             <>
-            <p>Enter supplier name</p>
-            <input type="text" required onChange={(e) => setSupplierName(e.target.value)}></input>
-            <p>Supplier email</p>
-            <input type="email" required onChange={handleEmailChange}></input>
+            <div className="form-row">
+              <label htmlFor='supplierName'>Enter supplier name</label>
+              <input  name='supplierName' type="text" required onChange={(e) => setSupplierName(e.target.value)}></input>
+            </div>            
+            <div className="form-row">
+              <label htmlFor='supplierEmail'>Supplier email</label>
+              <input name='supplierEmail'type="email" required onChange={handleEmailChange}></input>
+            </div>
             </>
           }
           {/* {loadSupplierEmail()} */}
           {/* <input value={email} required onChange={handleEmailChange}></input> */}
-          <div className="form-subsection">
-            <div className="col1">
-              <p>Invoice date</p>
-              <input onChange={handleInvoiceDate} type="date"></input>
-            </div>
-            <div className="col2"> 
-            <p>Invoice Number</p>
-              <input type='text' onKeyDown={handleInvNumKeyDown} onBeforeInput={beforeInputInvoiceCharHandler} onChange={handleInvoiceNumChange} required></input>
-              {(!showInvNumChar) && <p>Numbers, letters, or dashes only!</p>}
-            </div>
-          </div>
-          <div className='form-subsection'>
-            <div className="col1">
-              <p>Total invoice amount</p>
-              <input id="invoice-amt" required type='number' onChange={handleTotal} step='0.01'></input>
-            </div>
-            <div className="col2">
-              <p>GST amount</p>
-              <input id="gst-amt"type='number' onChange={handleGSTAmount} step='0.01'></input>
+          <div className="form-row">
+            <div className='form-multiCol-row'>
+              <div className="col1">
+                <label htmlFor='invDate'>Invoice date</label>
+                <input name='invDate' onChange={handleInvoiceDate} type="date"></input>
+              </div>
+              <div className="col2"> 
+                <label htmlFor='invNum'>Invoice number</label>
+                <input name='invNum' type='text' onKeyDown={handleInvNumKeyDown} onBeforeInput={beforeInputInvoiceCharHandler} onChange={handleInvoiceNumChange} required></input>
+                {(!showInvNumChar) && <p>Numbers, letters, or dashes only!</p>}
+              </div>
             </div>
           </div>
-          <p>Payment purpose</p>
-          <input id="payment-purpose" required onChange={handlePurpose} maxLength="500" type='text'/> 
-          <p>Sub-account code</p>
-          <AccountDropdown handleChange={handleAccCode}/>
-          <p>Treasurer name</p>
-          <input required maxLength="500" onChange={handleName} type="text"></input>
-          <p>Upload invoice</p>
-          <input required onChange={handleFile} accept=".pdf" type="file"/>
-          {supplier == "-2" && 
-                <>
-                  <p>Upload void cheque</p>
-                  <FileUpload />
-                </>
+          <div className='form-row'>
+            <div className='form-multiCol-row'>
+                <div className="col1">
+                  <label htmlFor='invAmt'>Total invoice amount</label>
+                  <input name='invAmt' id="invoice-amt" required type='number' onChange={handleTotal} step='0.01'></input>
+                </div>
+                <div className="col2">
+                  <label htmlFor='gstAmt'>GST amount</label>
+                  <input required name='gstAmt' id="gst-amt"type='number' onChange={handleGSTAmount} step='0.01'></input>
+                </div>
+            </div>
+          </div>
+          <div className='form-row'>
+            <label htmlFor='paymentPurpose'>Payment purpose</label>
+            <textarea name='paymentPurpose' id="payment-purpose" required onChange={handlePurpose} maxLength="150" type='text'/>
+          </div>
+          <div className='form-row'>
+            <label className="accountDropdownLabel" htmlFor='subaccountCode'>Sub-account code</label>
+            <AccountDropdown handleChange={handleAccCode}/>
+          </div>
+          <div className='form-row'>
+            <label htmlFor='treasurerName'>Treasurer name</label>
+            <input name='treasurerName' required maxLength="500" onChange={handleName} type="text"></input>
+          </div>
+          <div className='form-row'>
+            <label htmlFor='invoice'>Invoice File (must be under 5MB)</label>
+            <input name='invoice' accept=".pdf"required onChange={handleInvoice} type="file"/>
+          </div>
+          {supplier == "Other" && 
+                <div className='form-row'>
+                  <label className="voidChequeLabel" htmlFor='voidCheque'>Upload void cheque (must be under 5MB)</label>
+                  <input name='voidCheque' onChange={handleVoidCheque} required type='file' accept=".pdf"></input>
+                </div>
           }
-          <button className='generate-btn'>Generate</button>
+          <div className='form-row' id='submit-row'>
+            <button className='generate-btn'>Generate!</button>
+          </div>
         </form>
       </div>
       <div className='rhs'>
         <InvoicePreviewer data={fileLink}/>
         {err !== null && <p>{err}</p>}
-        {(supplier !== "-2" && supplier !== "") ?         
+        {(supplier !== "Other" && supplier !== "") ?         
           <DownloadButton file={fileLink} supplier={supplier.name} invoiceNum={invoiceNum}/> :
           <DownloadButton file={fileLink} supplier={supplierName} invoiceNum={invoiceNum}/>
         }
@@ -267,15 +361,16 @@ function GeneralSupplierForm({supplier}) {
 }
 
 
-function ProcessableSupplierForm({supplier, setSupplier}) {
+function ProcessableSupplierForm({supplier}) {
 
   const [accCode, setAccCode] = useState(null);
   const [name, setName] = useState(null);
   const [purpose, setPurpose] = useState(null);
   const [file, setFile] = useState(null);
-  const [fileLink, setFileLink] = useState(null);
+  const [fileLink, setFileLink] = useState("src/previewerDefault.html");
   const [err, setErr] = useState(null);
   const [invoiceNum, setInvoiceNum]  = useState(null);
+
 
   async function handleProcessableSubmit(e) {
     e.preventDefault();
@@ -339,15 +434,28 @@ function ProcessableSupplierForm({supplier, setSupplier}) {
     <div className="form">
       <div className="lhs">
         <form onSubmit={handleProcessableSubmit}> 
-          <p>Payment purpose</p>
-          <input required onChange={handlePurpose} maxLength="500" type='text'/> 
-          <p>Sub-account code</p>
-          <AccountDropdown handleChange={handleAccCode}/>
-          <p>Treasurer name</p>
-          <input required maxLength="500" onChange={handleName} type="text"></input>
-          <p>Upload invoice</p>
-          <input required onChange={handleFile} accept=".pdf" type="file"/>
-          <button className='generate-btn'>Generate</button>
+          <div className="form-row">
+            <label>Payment purpose</label>
+            <textarea name='paymentPurpose' id="payment-purpose" required onChange={handlePurpose} maxLength="500" type='text'/>
+          </div>
+          <div className="form-row">
+            <label className="accountDropdownLabel">Sub-account code</label>
+            <AccountDropdown handleChange={handleAccCode}/>
+          </div>
+          <div className="form-row">
+            <label>Treasurer name</label>
+            <input name='treasurerName'required maxLength="500" onChange={handleName} type="text"></input>
+          </div>
+          <div className='form-row'>
+            <div className="invoice-file-text">
+              <label className="invoiceFileLabel">Invoice file (must be under 5MB)</label>
+              <p className="invoiceFileInfoMsg">For the invoice to be parsed succesfully, please submit only native PDFs (not a scan!)</p>
+            </div>
+            <input name='invoice' required onChange={handleFile} accept=".pdf" type="file"/>
+          </div>
+          <div className='form-row'>
+            <button className='generate-btn'>Generate</button>
+          </div>
         </form>
       </div>
       <div className='rhs'>
@@ -378,8 +486,8 @@ function AccountDropdown({handleChange}) {
 
   return (
     <div>
-      <select required onChange={handleChange}>
-        <option value=''>Select an account</option>
+      <select name='subaccountCode' required onChange={handleChange}>
+        <option value=''></option>
         {accountOptions}
       </select>
     </div>
@@ -389,18 +497,31 @@ function AccountDropdown({handleChange}) {
 
 function InvoicePreviewer({data}) {
   return (
-    <iframe className="previewer" src={data} title="Completed invoice requistion form"></iframe >
+      <iframe className="previewer" src={data} title="Completed invoice requisition form" allowFullScreen={true}></iframe >
+    // <iframe className="previewer" src={data} title="Completed invoice requisition form" allowFullScreen={true}></iframe >
   );
 }
 
+function showDownloadError() {
+  setDownloadError(1);
+}
+
 function DownloadButton({file, invoiceNum, supplier}) {
-  // need to implement error handling
+
+  const [downloadError, setDownloadError] = useState(false);
+
   return (
     <div className="download">
+      {(file === "src/previewerDefault.html") ?  
+      <>
+        <button className="download-btn" onClick={() => {setDownloadError(true)}}>Download PDF &#128140;</button>
+      </> :
       <a href={file} download={invoiceNum + "_" + supplier + "_Merged"}>
-        <button >
-        Download PDF</button>
+        <button onClick={() => {setDownloadError(false)}} className="download-btn">
+        Download PDF &#128140;</button>
       </a>
+    }
+    {(downloadError && file === "src/previewerDefault.html") && <p className="rhs-error-msg">No invoice uploaded!</p>}
     </div>
   );
 }
@@ -413,11 +534,11 @@ function GreetingHeader() {
   }
   const hour = getTime();
   if (hour >= 4 && hour < 12) {
-    return <p>Good Morning, Sprouts treasurer </p>
+    return <p className="header">Good Morning, Sprouts Treasurer &#127793;</p>
   } else if (hour >= 12 && hour < 17) {
-    return <p>Good Afternoon, Sprouts treasurer!</p>
+    return <p className="header">Good Afternoon, Sprouts Treasurer &#127793;</p>
   } else {
-    return <p>Good Evening, Sprouts treasurer °‧ 𓆝 𓆟 𓆞 ·｡</p>
+    return <p className="header">Good Evening, Sprouts Treasurer &#127793;</p>
   }
 }
 

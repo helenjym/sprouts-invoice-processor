@@ -10,7 +10,7 @@ const fs = require('fs');
 
 class InvoicePayment {
     supplier: string;
-    invoiceNum: number;
+    invoiceNum: string;
     date: string;
     subtotal: number;
     gst: number;
@@ -23,7 +23,7 @@ class InvoicePayment {
     private setSupplier(name: string) {
         this.supplier = name;
     }
-    private setInvoiceNum(invoiceNum: number) {
+    private setInvoiceNum(invoiceNum: string) {
         this.invoiceNum = invoiceNum;
     }
     private setDate(date: string) {
@@ -57,13 +57,14 @@ class InvoicePayment {
     private constructor() {
     }
 
-    static createGeneralInvoice(supplierName: string, invoiceNum: number, date: string, gst: number, total: number, email: string, accCode: number, purpose: string, treasurerName: string): InvoicePayment {
+    static createGeneralInvoice(supplierName: string, invoiceNum: string, date: string, gst: number, total: number, email: string, accCode: number, purpose: string, treasurerName: string): InvoicePayment {
         const invoice = new InvoicePayment();
         invoice.setAccountCode(accCode);
         invoice.setSupplier(supplierName);
         invoice.setInvoiceNum(invoiceNum);
         invoice.setDate(date);
-        invoice.setSubtotal(total-gst);
+        const subtotal = parseFloat((total - gst).toFixed(2));
+        invoice.setSubtotal(subtotal);
         invoice.setGst(gst);
         invoice.setTotal(total);
         invoice.setPaymentPurpose(purpose);
@@ -82,7 +83,7 @@ class InvoicePayment {
         const result = await parser.getText();
         const resultText = result.text;
         const date = resultText.slice(225, 233);
-        const invoiceNum = +(resultText.slice(12, 19));
+        const invoiceNum = resultText.slice(12, 19);
         const subtotalIndex = resultText.indexOf("Subtotal");
         const textFromSubtotal = resultText.slice(subtotalIndex + 20);
         const endOfSubtotal = textFromSubtotal.indexOf("\n") + subtotalIndex + 20;
@@ -389,7 +390,7 @@ class InvoicePaymentRequisition {
             gstAmount.setText(invoice.gst.toString());
             }
             if (invoice.invoiceNum !== null) {
-            invNum.setText(invoice.invoiceNum.toString());
+            invNum.setText(invoice.invoiceNum);
             }
             payableTo.setText(invoice.supplier);
             paymentPurpose.setText(invoice.purpose);
@@ -413,6 +414,34 @@ class InvoicePaymentRequisition {
         }
     }
 
+    async attachSupportingDoc(filepath): Promise<Uint8Array> {
+        try {
+        const pdfBytes = await fs.readFileSync(filepath);
+        const IPRFile = await PDFDocument.load(this.File);
+        const pdf = await PDFDocument.load(pdfBytes);
+        const numFilePages = pdf.getPageCount();
+        for (let i = 0; i < numFilePages; i++) {
+            // copy pages returns list of size 1
+            // [page] is destructuring assignment, just page
+            // would assign page to be an array, could also do
+            // const page = await IPRFile.copyPages(pdf, [i])[0]
+            // actually no haha
+            // const copiedPage = await IPRFile.copyPages(pdf, [i]);
+            // const page = copiedPage[0];
+            // bc async?
+            const [page] = await IPRFile.copyPages(pdf, [i]);
+            IPRFile.addPage(page);
+        }
+        const fileBytes = await IPRFile.save();
+        this.File = fileBytes;
+        return fileBytes;
+    } catch(e) {
+        console.log("Invoice processor: " + e.message);
+        throw e;
+    }
+
+    }
+
     async attachInvoice(): Promise<Uint8Array> {
         const pdfBytes = await fs.readFileSync("../uploads/Invoice.pdf");
         const IPRFile = await PDFDocument.load(this.File);
@@ -424,6 +453,25 @@ class InvoicePaymentRequisition {
         }
         const attachInvoiceFileBytes = await IPRFile.save();
         return attachInvoiceFileBytes;
+    }
+
+    
+    async attachVoidCheque(): Promise<Uint8Array> {
+        try {
+            const pdfBytes = await fs.readFileSync("../uploads/VoidCheque.pdf");
+            const IPRFile = await PDFDocument.load(this.File);
+            const invoiceDoc = await PDFDocument.load(pdfBytes);
+            const numInvoicePages = invoiceDoc.getPageCount();
+            for (let i = 0; i < numInvoicePages; i++) {
+                const [page] = await IPRFile.copyPages(invoiceDoc, [i]);
+                IPRFile.addPage(page);
+            }
+            const attachVCFileBytes = await IPRFile.save();
+            return attachVCFileBytes;
+        } catch(e) {
+            console.log("Invoice processor: " + e.message);
+            throw e;
+        }
     }
 }
 

@@ -1,17 +1,19 @@
-const express = require('express') ;
-var cors = require('cors');
-const multer = require('multer');
+import express from 'express';
+import cors from 'cors';
+import multer from 'multer';
 const app = express();
 const port = 3000;
-const { InvoicePayment, InvoicePaymentRequisition } = require( '../controller/InvoiceProcessor.ts');
-const fs = require('fs'); 
-const {body, validationResult, check} = require('express-validator');
+import { InvoicePayment, InvoicePaymentRequisition } from '../../controller/InvoiceProcessor.ts';
+import fs from 'fs'; 
+import pkg from 'express-validator';
+const {body, validationResult, check} = pkg;
+import serverless from "serverless-http";
 
 
 const createEmailChain = () => body('email').isEmail();
 // file name is the same every upload--any existing file gets replaced
 const storage=multer.diskStorage({
-    destination:(req,file,cb)=>cb(null,'../uploads'),
+    destination:(req,file,cb)=>cb(null,'../../uploads'),
     fileFilter: (req, file, cb) => {
         if (file.fieldname !== "invoice" && file.fieldname !== "voidCheque") {
             cb(null,false);
@@ -36,7 +38,7 @@ function validateUploadedFile(file) {
         return false;
     }    
     try {
-        const fd = fs.openSync('../uploads/Invoice.pdf');
+        const fd = fs.openSync('../../uploads/Invoice.pdf');
         try {
             const buffer = Buffer.alloc(5);
             fs.readSync(fd, buffer, 0, 5, 0);
@@ -74,7 +76,7 @@ app.post('/upload', upload.fields([
     check("supplierName").trim().notEmpty().matches(/^[A-Za-z0-9',&-\s]+$/)
     .isLength({max: 500}),
     createEmailChain(),
-    check("date").isDate([strictMode="true"]),
+    check("date").isDate(),
     check("invoiceNum").trim().notEmpty().matches(/^[A-Za-z0-9-\s]+$/).isLength({max: 500}),
     check("purpose").trim().notEmpty().matches(/^[A-Za-z0-9',-./!\s]+$/).isLength({max: 500}),
     check("accCode").trim().notEmpty().matches(/^[0-9]+$/).isLength(5),
@@ -108,9 +110,9 @@ app.post('/upload', upload.fields([
         const invoicePayment = InvoicePayment.createGeneralInvoice(req.body.supplierName, req.body.invoiceNum, req.body.date, gst, total, req.body.email, accCode, req.body.purpose, req.body.treasurerName);
         const IPR = await InvoicePaymentRequisition.create(invoicePayment);
         // sending a file path is relative to the intiial call? oh wait that makes sense
-        let bytes = await IPR.attachSupportingDoc("../uploads/Invoice.pdf");
+        let bytes = await IPR.attachSupportingDoc("../../uploads/Invoice.pdf");
         if (voidChequeAttached) {
-            bytes = await IPR.attachSupportingDoc("../uploads/VoidCheque.pdf");
+            bytes = await IPR.attachSupportingDoc("../../uploads/VoidCheque.pdf");
         }
         fs.writeFileSync("IPR_Merged.pdf"
             , bytes, 'utf-8');
@@ -172,7 +174,7 @@ app.get('/download/:iv', check("iv").trim().notEmpty().matches(/^[A-Za-z0-9-\s]+
 
 app.get('/suppliers', (req, res) => {
     try {
-        const suppliersFile = fs.readFileSync('../data/suppliers.json', "utf-8");
+        const suppliersFile = fs.readFileSync('../../data/suppliers.json', "utf-8");
         // returns a utf-8 character encoding of the json file
         const suppliers = JSON.parse(suppliersFile);
         res.json(suppliers);
@@ -186,4 +188,6 @@ app.listen(port, () => {
     console.log(`App listening on port ${port}`);
 });
 
+
+export const handler = serverless(app);
 

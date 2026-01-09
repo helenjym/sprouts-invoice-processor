@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import './App.css';
 import { useState } from 'react';
-import './ThemeOption.jsx'
 
 
 function App() {
@@ -53,7 +52,7 @@ function App() {
 
   return (
     <div className="App">
-        <div onClick={handleTheme} className='theme-option'><p>{(theme === "day") ?"night mode" : "day mode"}</p></div>
+        <div onClick={handleTheme} className='theme-option'><p className="theme-option-text">{(theme === "day") ?"night mode" : "day mode"}</p></div>
         {connectionError && <p className="connectionErrMessage">Connection to server failed :( please try again later</p>}
         <GreetingHeader />
         <div className="content">

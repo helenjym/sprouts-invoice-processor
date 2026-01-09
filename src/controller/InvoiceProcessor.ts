@@ -1,6 +1,6 @@
-const {PDFParse} = require('pdf-parse');
-const {PDFDocument} = require('pdf-lib');
-const fs = require('fs');
+import {PDFParse} from 'pdf-parse';
+import {PDFDocument} from 'pdf-lib';
+import fs from 'fs';
 // import scribe from 'scribe.js-ocr';
 // import {parse} from 'node-html-parser';
 // import {XMLParser} from 'fast-xml-parser';
@@ -8,7 +8,7 @@ const fs = require('fs');
 // const path = require('node:path');
 
 
-class InvoicePayment {
+export class InvoicePayment {
     supplier: string;
     invoiceNum: string;
     date: string;
@@ -77,7 +77,7 @@ class InvoicePayment {
     static async createHorizonInvoice(accCode: number, purpose: string, treasurerName: string): Promise<InvoicePayment> { 
         const invoice = new InvoicePayment();
         // error handling
-        const invoiceFile = await fs.readFileSync("../uploads/Invoice.pdf");
+        const invoiceFile = await fs.readFileSync("../../uploads/Invoice.pdf");
         const parser = new PDFParse({data: invoiceFile});
 
         const result = await parser.getText();
@@ -333,7 +333,7 @@ class InvoicePayment {
 // }
 
 
-class InvoicePaymentRequisition {
+export class InvoicePaymentRequisition {
     private File: Uint8Array;
     private supplier: string;
     private invoiceNum: string;
@@ -352,7 +352,7 @@ class InvoicePaymentRequisition {
 
     static async create(invoice: InvoicePayment): Promise<InvoicePaymentRequisition> {
         try {
-            const pdfBytes = await fs.readFileSync("../Invoice-Requisition-Form_Nov-2024_Fillable.pdf");
+            const pdfBytes = await fs.readFileSync("../../Invoice-Requisition-Form_Nov-2024_Fillable.pdf");
             const IPRFile = await PDFDocument.load(pdfBytes);
             IPRFile.removePage(1);
             const form = IPRFile.getForm();
@@ -443,7 +443,7 @@ class InvoicePaymentRequisition {
     }
 
     async attachInvoice(): Promise<Uint8Array> {
-        const pdfBytes = await fs.readFileSync("../uploads/Invoice.pdf");
+        const pdfBytes = await fs.readFileSync("../../uploads/Invoice.pdf");
         const IPRFile = await PDFDocument.load(this.File);
         const invoiceDoc = await PDFDocument.load(pdfBytes);
         const numInvoicePages = invoiceDoc.getPageCount();
@@ -458,7 +458,7 @@ class InvoicePaymentRequisition {
     
     async attachVoidCheque(): Promise<Uint8Array> {
         try {
-            const pdfBytes = await fs.readFileSync("../uploads/VoidCheque.pdf");
+            const pdfBytes = await fs.readFileSync("../../uploads/VoidCheque.pdf");
             const IPRFile = await PDFDocument.load(this.File);
             const invoiceDoc = await PDFDocument.load(pdfBytes);
             const numInvoicePages = invoiceDoc.getPageCount();
@@ -476,7 +476,4 @@ class InvoicePaymentRequisition {
 }
 
 // InvoicePayment.createHorizonInvoice(60015, "purchases", "Helen", "bob").then((data) => console.log(data));
-
-module.exports.InvoicePayment = InvoicePayment;
-module.exports.InvoicePaymentRequisition = InvoicePaymentRequisition;
 

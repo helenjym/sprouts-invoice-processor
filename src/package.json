@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
+    "@napi-rs/canvas": "^0.1.88",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
@@ -16,7 +17,6 @@
     "pdf-lib": "^1.17.1",
     "pdf-parse": "^2.4.5",
     "serverless-http": "^4.0.0",
-    "@napi-rs/canvas": "^0.1.88",
     "web-vitals": "^2.1.4"
   },
   "eslintConfig": {

@@ -11,6 +11,9 @@ const {body, validationResult, check} = pkg;
 import serverless from "serverless-http";
 
 const router = Router();
+app.use(cors());
+app.use(express.json());
+
 
 
 const createEmailChain = () => body('email').isEmail();
@@ -64,8 +67,6 @@ function validateUploadedFile(file) {
 
 
 const upload = multer({storage});
-app.use(cors());
-app.use(express.json());
 
 router.get('/invoice', (req, res) => {
     res.send("Hello");
@@ -187,9 +188,9 @@ router.get('/suppliers', (req, res) => {
 
 app.use('/api/', router)
 
-// app.listen(port, () => {
-//     console.log(`App listening on port ${port}`);
-// });
+app.listen(port, () => {
+    console.log(`App listening on port ${port}`);
+});
 
 
 export const handler = serverless(app);

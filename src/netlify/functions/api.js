@@ -1,8 +1,9 @@
 import express from 'express';
+import Router from 'express';
 import cors from 'cors';
 import multer from 'multer';
 const app = express();
-// const port = 3000;
+const port = 3000;
 import { InvoicePayment, InvoicePaymentRequisition } from '../../controller/InvoiceProcessor.ts';
 import fs from 'fs'; 
 import pkg from 'express-validator';
@@ -184,12 +185,12 @@ router.get('/suppliers', (req, res) => {
     }
 })
 
+app.use('/api/', router)
+
 // app.listen(port, () => {
 //     console.log(`App listening on port ${port}`);
 // });
 
 
-
-app.use('/api/', router)
 export const handler = serverless(app);
 

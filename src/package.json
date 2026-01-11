@@ -1,0 +1,46 @@
+{
+  "name": "sprouts-invoice-processor",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "netlify deploy --prod"
+  },
+  "dependencies": {
+    "@napi-rs/canvas": "^0.1.88",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^13.5.0",
+    "@xmldom/xmldom": "^0.8.11",
+    "cors": "^2.8.5",
+    "express": "^5.2.1",
+    "express-validator": "^7.3.1",
+    "multer": "^2.0.2",
+    "pdf-lib": "^1.17.1",
+    "pdf-parse": "^2.4.5",
+    "serverless-http": "^4.0.0",
+    "web-vitals": "^2.1.4"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.3"
+  }
+}

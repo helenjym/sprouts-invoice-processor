@@ -2,8 +2,10 @@
 
 # dependencies
 /node_modules
+/src/node_modules
 /.pnp
 .pnp.js
+
 
 # testing
 /coverage
@@ -11,6 +13,7 @@
 /src/rest/InvoicePayment.json
 /src/rest/IPR_Merged.pdf
 /src/rest/VoidCheque.pdf
+/src/package-lock.json
 
 # production
 /build
@@ -25,3 +28,9 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+/src/netlify/functions/IPR_Merged.pdf
+/src/netlify/functions/InvoicePayment.json
+/src/uploads/Invoice.pdf
+
+# Local Netlify folder
+.netlify

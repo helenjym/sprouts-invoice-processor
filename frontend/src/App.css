@@ -5,7 +5,7 @@
 
 
 body[data-theme="light"] {
-  --primary-background-color: rgb(209, 222, 192);
+  --primary-background-color: rgb(221, 241, 212);
   /* --header-background-color: rgb(209, 228, 195); */
   --primary-header-color: rgb(88, 77, 44);
   --primary-label-color: rgb(88, 77, 44);
@@ -108,8 +108,8 @@ label:has(+ select:required)::after {
   padding-right: 25px;
   padding-top: 20px;
   background-color: var(--primary-background-color);
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
+  border-top-left-radius:5px;
+  border-top-right-radius: 5px;
   /* border-style: solid;
   border-width: 1px; */
   /* border-color: var(--primary-label-color) */
@@ -158,8 +158,8 @@ label:has(+ select:required)::after {
   padding-right: 25px;
   padding-bottom: 25px;
   background-color: var(--primary-background-color);
-  border-bottom-left-radius: 20px;
-  border-bottom-right-radius: 20px;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
   height: 100%;
 
 }
@@ -305,14 +305,14 @@ select:focus {
 
 .previewer {
   position: sticky;
-  height: 550px;
-  width: 450px;
+  height: 590px;
+  width: 430px;
   color: rgb(86, 89, 65);
   margin-top: -80px;
   border-width: 0.5px;
   border-style: dotted;
   border-style: none;
-  border-radius: 15px;
+  border-radius: 5px;
   background-color: var(--primary-background-color);
 }
 
@@ -472,6 +472,10 @@ button:hover {
   cursor: pointer;
 }
 
+
+.theme-option-text {
+  cursor: pointer;
+}
 
 
 

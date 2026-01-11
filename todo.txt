@@ -19,9 +19,6 @@ FRONTEND
 [X] - display error message when fetch response status is not 200
 [X] - fetch suppliers data on page load
 
-
-
-
 FUTURE FEATURES
 - settings tab where user can:
     - add a new known supplier or edit existing
@@ -29,8 +26,6 @@ FUTURE FEATURES
     - submit complaint/bug report to me thru email
 - invoice signing
 - invoice parsing for other known suppliers
-
-
 
 CURRENT BUGS:
 - always fetching suppliers twice / rendering twice

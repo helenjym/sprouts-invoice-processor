@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "scripts": {
+    "build": "netlify deploy --prod"
+  },
   "dependencies": {
     "@napi-rs/canvas": "^0.1.88",
     "@testing-library/dom": "^10.4.1",

@@ -1,3 +1,4 @@
+import 'pdf-parse/worker';
 import {PDFParse} from 'pdf-parse';
 import {PDFDocument} from 'pdf-lib';
 import fs from 'fs';

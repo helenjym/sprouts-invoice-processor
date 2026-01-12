@@ -13,7 +13,7 @@
 /src/rest/InvoicePayment.json
 /src/rest/IPR_Merged.pdf
 /src/rest/VoidCheque.pdf
-/src/package-lock.json
+
 
 # production
 /build

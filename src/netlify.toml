@@ -5,3 +5,7 @@
   from = "/api/*"
   status = 200
   to = "/.netlify/functions/api/:splat"
+[functions]
+    node_bundler = "esbuild"
+    external_node_modules = ["pdf-parse", "@napi-rs/canvas"]
+

@@ -3,7 +3,6 @@ import {PDFParse} from 'pdf-parse';
 import {PDFDocument} from 'pdf-lib';
 import fs from 'fs';
 
-
 export class InvoicePayment {
     supplier: string;
     invoiceNum: string;

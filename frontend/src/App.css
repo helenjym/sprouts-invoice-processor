@@ -19,7 +19,7 @@ body[data-theme="dark"] {
   --primary-header-color: rgb(235, 229, 191);
   --primary-label-color: rgb(66, 76, 16);
   --input-shadow-color: rgb(179, 178, 178);
-  --bg-image: url("src/assets/nightbg.png");
+  --bg-image: url("assets/nightbg.png");
 }
 
 body {
@@ -51,13 +51,13 @@ label:has(+ select:required)::after {
 
 @font-face {
   font-family: pixelCursive;
-  src: url(src/assets/fonts/Cursive.ttf);
+  src: url(assets/fonts/Cursive.ttf);
 }
 
 
 @font-face {
   font-family: DOS;
-  src: url(src/assets/fonts/Perfect\ DOS\ VGA\ 437.ttf);
+  src: url(assets/fonts/Perfect\ DOS\ VGA\ 437.ttf);
 }
 
 .logo {

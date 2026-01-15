@@ -16,7 +16,7 @@ function App() {
 
   async function fetchData() {
     try {
-      const response = await fetch('http://localhost:3010/suppliers');
+      const response = await fetch('https://server-production-7685.up.railway.app/suppliers');
       const suppliersObj = await response.json();
       setSuppliers(suppliersObj);
       setConnectionError(false);
@@ -485,7 +485,7 @@ function DownloadButton({file, invoiceNum, supplier}) {
 
   return (
     <div className="download">
-      {(file === "src/previewerDefault.html") ?  
+      {(file === "previewerDefault.html") ?  
       <>
         <button className="download-btn" onClick={() => {setDownloadError(true)}}>Download PDF &#128140;</button>
       </> :
@@ -494,7 +494,7 @@ function DownloadButton({file, invoiceNum, supplier}) {
         Download PDF &#128140;</button>
       </a>
     }
-    {(downloadError && file === "src/previewerDefault.html") && <p className="rhs-error-msg">No invoice uploaded!</p>}
+    {(downloadError && file === "previewerDefault.html") && <p className="rhs-error-msg">No invoice uploaded!</p>}
     </div>
   );
 }

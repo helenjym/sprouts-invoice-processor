@@ -106,7 +106,7 @@ function GeneralSupplierForm({supplier}) {
   const [voidCheque, setVoidCheque] = useState(null);
   const [showInvNumChar, setshowInvNumChar] = useState(1);
   const [err, setErr] = useState(null);
-  const [fileLink, setFileLink] = useState("src/previewerDefault.html");
+  const [fileLink, setFileLink] = useState("previewerDefault.html");
   const [supplierName, setSupplierName] = useState(null);
   
 
@@ -340,7 +340,7 @@ function ProcessableSupplierForm({supplier}) {
   const [name, setName] = useState(null);
   const [purpose, setPurpose] = useState(null);
   const [file, setFile] = useState(null);
-  const [fileLink, setFileLink] = useState("src/previewerDefault.html");
+  const [fileLink, setFileLink] = useState("previewerDefault.html");
   const [err, setErr] = useState(null);
   const [invoiceNum, setInvoiceNum]  = useState(null);
 

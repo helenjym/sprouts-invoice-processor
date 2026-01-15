@@ -106,7 +106,7 @@ function GeneralSupplierForm({supplier}) {
   const [voidCheque, setVoidCheque] = useState(null);
   const [showInvNumChar, setshowInvNumChar] = useState(1);
   const [err, setErr] = useState(null);
-  const [fileLink, setFileLink] = useState("./previewerDefault.html");
+  const [fileLink, setFileLink] = useState("src/previewerDefault.html");
   const [supplierName, setSupplierName] = useState(null);
   
 

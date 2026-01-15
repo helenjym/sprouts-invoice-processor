@@ -3,7 +3,7 @@ import Router from 'express';
 import cors from 'cors';
 import multer from 'multer';
 const app = express();
-const port = 3010;
+const port = process.env.PORT || 3000;
 import { InvoicePayment, InvoicePaymentRequisition } from '../controller/InvoiceProcessor.ts';
 import fs from 'fs'; 
 import pkg from 'express-validator';
@@ -185,7 +185,7 @@ app.get('/suppliers', (req, res) => {
 })
 
 app.listen(port, () => {
-    console.log(`App listening on port ${port}`);
+    console.log(`App listening on port: ${port}`);
 });
 
 export default app;

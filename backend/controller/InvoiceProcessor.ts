@@ -73,7 +73,7 @@ export class InvoicePayment {
     static async createFromParseableInvoice(supplierName: string, accCode: number, purpose: string, treasurerName: string): Promise<InvoicePayment> { 
         try {
             const invoice = new InvoicePayment();
-            const invoiceFile = await fs.readFileSync("../../uploads/Invoice.pdf");
+            const invoiceFile = await fs.readFileSync("uploads/Invoice.pdf");
             const parser = new PDFParse({data: invoiceFile});
             const result = await parser.getText();
             const resultText = result.text;
@@ -151,7 +151,7 @@ export class InvoicePaymentRequisition {
 
     static async create(invoice: InvoicePayment): Promise<InvoicePaymentRequisition> {
         try {
-            const pdfBytes = await fs.readFileSync("../../Invoice-Requisition-Form_Nov-2024_Fillable.pdf");
+            const pdfBytes = await fs.readFileSync("Invoice-Requisition-Form_Nov-2024_Fillable.pdf");
             const IPRFile = await PDFDocument.load(pdfBytes);
             IPRFile.removePage(1);
             const form = IPRFile.getForm();

@@ -16,7 +16,7 @@ function App() {
 
   async function fetchData() {
     try {
-      const response = await fetch('http://localhost:3000/api/suppliers');
+      const response = await fetch('http://localhost:3010/suppliers');
       const suppliersObj = await response.json();
       setSuppliers(suppliersObj);
       setConnectionError(false);
@@ -32,7 +32,6 @@ function App() {
     } else {
       const supplierIndex = e.target.value;
       const supplier = suppliers[supplierIndex];
-      console.log(supplier.name);
       setSupplier(supplier);
     }
   }
@@ -68,7 +67,7 @@ function App() {
           }
         </div>
     </div>
-  );i
+  );
 }
 
 function SupplierDropdown({handleChange, suppliers}) {
@@ -191,31 +190,6 @@ function GeneralSupplierForm({supplier}) {
 
   }
 
-  // function validateSubmit(){
-
-  //   if (invoiceNum === null) {
-  //     // show error message: "Field is required"
-  //   }
-  //   if (total === null) {
-  //     // show error message: "Field is required"
-  //   }
-
-  //   if (gst === null) {
-  //     // show error message: "Field is required"
-  //   }
-
-  //   if (purpose === null) {
-  //       // show error message: "Field is required"
-  //   }
-  //   if (treasurerName === null) {
-  //     // show error message: "Field is required"
-  // }
-
-  //   if (accCode === "") {
-  //     // show error message "Please choose an account"
-  //   }
-
-  // }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -244,7 +218,7 @@ function GeneralSupplierForm({supplier}) {
         form.append("voidCheque", voidCheque);
       }
       try {
-        const uploadResponse = await fetch('http://localhost:3000/api/upload', {
+        const uploadResponse = await fetch('http://localhost:3010/upload', {
           method: "POST",
           body: form,
         });
@@ -253,7 +227,7 @@ function GeneralSupplierForm({supplier}) {
           console.log(uploadResponseText);
           throw new Error("File upload error");
         }
-        const downloadResponse = await fetch('http://localhost:3000/api/download/' + invoiceNum);
+        const downloadResponse = await fetch('http://localhost:3010/download/' + invoiceNum);
         if (!downloadResponse.ok) {
           const downloadResponseText = await downloadResponse.text();
           console.log(downloadResponseText);  
@@ -382,7 +356,7 @@ function ProcessableSupplierForm({supplier}) {
     form.append("treasurerName", name);
     form.append("invoice", file);
     try {
-      const uploadResponse = await fetch('http://localhost:3000/api/upload/' + supplierName, {
+      const uploadResponse = await fetch('http://localhost:3010/upload/' + supplierName, {
         method: "POST",
         body: form,
       });
@@ -392,7 +366,7 @@ function ProcessableSupplierForm({supplier}) {
         throw new Error(`Response status: ${uploadResponse.status}`);
       } else {
         setInvoiceNum(uploadResponseText);
-        const downloadResponse = await fetch('http://localhost:3000/api/download/' + uploadResponseText);
+        const downloadResponse = await fetch('http://localhost:3010/download/' + uploadResponseText);
         if (!downloadResponse.ok) {
           console.log(downloadResponse.statusText);
           throw new Error(`Response status: ${downloadResponse.status}`);

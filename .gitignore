@@ -1,36 +1,5 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # dependencies
 /node_modules
-/src/node_modules
-/.pnp
-.pnp.js
 
 
-# testing
-/coverage
 /invoices
-/src/rest/InvoicePayment.json
-/src/rest/IPR_Merged.pdf
-/src/rest/VoidCheque.pdf
-
-
-# production
-/build
-
-# misc
-.DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-/src/netlify/functions/IPR_Merged.pdf
-/src/netlify/functions/InvoicePayment.json
-/src/uploads/Invoice.pdf
-
-# Local Netlify folder
-.netlify

@@ -22,7 +22,7 @@ function App() {
       setConnectionError(false);
     } catch(e) {
       setConnectionError(true);
-      console.err(e);
+      console.error(e);
     }
   }
 
@@ -231,7 +231,7 @@ function GeneralSupplierForm({supplier}) {
         setFileLink(fileURL);
       } catch(e) {
         setErr("Error occurred: " + e.message);
-        console.err(e);
+        console.error(e);
         return;
       }
     }
@@ -363,7 +363,7 @@ function ProcessableSupplierForm({supplier}) {
     }
     } catch(err) {
       setErr("Error occurred, please check inputs or try again later!");
-      console.err(err);
+      console.error(err);
     }
   }
 

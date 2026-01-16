@@ -50,12 +50,12 @@ function validateUploadedFile(file) {
             const isValid = (signature === hexSignature)
             return isValid; 
         } catch(err) {
-            console.err(err);
+            console.error(err);
             fs.closeSync(fd);
             return false;
         }
     } catch(e) {
-        console.err(e);
+        console.error(e);
         return false;
     }
 }
@@ -84,7 +84,7 @@ app.post('/upload', upload.fields([
 ], async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        console.err(errors.array);
+        console.error(errors.array);
         return res.status(400).json({errors: errors.array()});
     }
     if (req.files["invoice"] === undefined) {
@@ -117,7 +117,7 @@ app.post('/upload', upload.fields([
         fs.writeFileSync("src/InvoicePayment.json", jsonData, 'utf-8');
         res.status(200).send("Upload succesful");
     } catch(e) {
-        console.err(e);
+        console.error(e);
         res.status(500).send("Error occurred while uploading");
     }
 });
@@ -140,7 +140,7 @@ app.post('/upload/:supplier', upload.single('invoice'), [check("purpose").trim()
             res.status(200).send(invoicePayment.invoiceNum);
         }
     } catch(e) {
-        console.err(e);
+        console.error(e);
         res.status(500).send("Error occurred while uploading");
     }
 });
@@ -161,7 +161,7 @@ app.get('/download/:iv', check("iv").trim().notEmpty().matches(/^[A-Za-z0-9-\s]+
         }
 
     } catch(e) {
-        console.err(e);
+        console.error(e);
         res.status(500).send("Error occurred while downloading");
     }
 });
@@ -173,7 +173,7 @@ app.get('/suppliers', (req, res) => {
         const suppliers = JSON.parse(suppliersFile);
         res.json(suppliers);
     } catch(e) {
-        console.err(e);
+        console.error(e);
         res.status(500).send("Error occurred");
     }
 })

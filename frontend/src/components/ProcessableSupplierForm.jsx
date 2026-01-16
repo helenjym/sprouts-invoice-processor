@@ -20,7 +20,7 @@ export default function ProcessableSupplierForm({supplier}) {
     form.append("treasurerName", name);
     form.append("invoice", file);
     try {
-      const uploadResponse = await fetch('http://localhost:3000/upload/' + supplierName, {
+      const uploadResponse = await fetch(import.meta.env.BACKEND_URL + "/upload/" + supplierName, {
         method: "POST",
         body: form,
       });
@@ -30,7 +30,7 @@ export default function ProcessableSupplierForm({supplier}) {
         throw new Error(`Response status: ${uploadResponse.status}`);
       } else {
         setInvoiceNum(uploadResponseText);
-        const downloadResponse = await fetch('http://localhost:3000/download/' + uploadResponseText);
+        const downloadResponse = await fetch(import.meta.env.BACKEND_URL + "/download/" + uploadResponseText);
         if (!downloadResponse.ok) {
           console.log(downloadResponse.statusText);
           throw new Error(`Response status: ${downloadResponse.status}`);

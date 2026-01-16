@@ -3,7 +3,7 @@ import Router from 'express';
 import cors from 'cors';
 import multer from 'multer';
 const app = express();
-const port = process.env.PORT || 3000;
+const port = 8080;
 import { InvoicePayment, InvoicePaymentRequisition } from '../controller/InvoiceProcessor.ts';
 import fs from 'fs'; 
 import pkg from 'express-validator';

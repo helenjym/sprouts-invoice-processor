@@ -12,7 +12,6 @@ export default function ProcessableSupplierForm({supplier}) {
   async function handleProcessableSubmit(e) {
     e.preventDefault();
     setErr(null);
-    console.log(accCode);
     const form = new FormData();
     const supplierName = supplier.name;
     form.append("accCode", accCode);
@@ -20,19 +19,18 @@ export default function ProcessableSupplierForm({supplier}) {
     form.append("treasurerName", name);
     form.append("invoice", file);
     try {
-      const uploadResponse = await fetch('http://localhost:3000/upload/' + supplierName, {
+      const uploadResponse = await fetch(import.meta.env.VITE_BACKEND_URL + "/upload/" + supplierName, {
         method: "POST",
         body: form,
       });
       const uploadResponseText = await uploadResponse.text();
-      console.log(uploadResponseText);
       if (!uploadResponse.ok) {
         throw new Error(`Response status: ${uploadResponse.status}`);
       } else {
         setInvoiceNum(uploadResponseText);
-        const downloadResponse = await fetch('http://localhost:3000/download/' + uploadResponseText);
+        const downloadResponse = await fetch(import.meta.env.VITE_BACKEND_URL + "/download/" + uploadResponseText);
         if (!downloadResponse.ok) {
-          console.log(downloadResponse.statusText);
+          console.error(downloadResponse.statusText);
           throw new Error(`Response status: ${downloadResponse.status}`);
         }
         const blob = await downloadResponse.blob();
@@ -41,7 +39,7 @@ export default function ProcessableSupplierForm({supplier}) {
     }
     } catch(err) {
       setErr("Error occurred, please check inputs or try again later!");
-      console.log(err);
+      console.error(err);
     }
   }
 

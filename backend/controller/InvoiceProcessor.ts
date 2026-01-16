@@ -1,7 +1,7 @@
+import 'pdf-parse/worker';
 import {PDFParse} from 'pdf-parse';
 import {PDFDocument} from 'pdf-lib';
 import fs from 'fs';
-
 
 export class InvoicePayment {
     supplier: string;
@@ -65,7 +65,6 @@ export class InvoicePayment {
         invoice.setPaymentPurpose(purpose);
         invoice.setEmail(email);
         invoice.setName(treasurerName);
-        console.log(invoice);
         return invoice;
     }
 
@@ -73,7 +72,7 @@ export class InvoicePayment {
     static async createFromParseableInvoice(supplierName: string, accCode: number, purpose: string, treasurerName: string): Promise<InvoicePayment> { 
         try {
             const invoice = new InvoicePayment();
-            const invoiceFile = await fs.readFileSync("../../uploads/Invoice.pdf");
+            const invoiceFile = await fs.readFileSync("uploads/Invoice.pdf");
             const parser = new PDFParse({data: invoiceFile});
             const result = await parser.getText();
             const resultText = result.text;
@@ -86,7 +85,6 @@ export class InvoicePayment {
             }
             return invoice;
         } catch(e){
-            console.log("Invoice processor: " + e.message);
             throw e;
         }
     }    
@@ -151,7 +149,7 @@ export class InvoicePaymentRequisition {
 
     static async create(invoice: InvoicePayment): Promise<InvoicePaymentRequisition> {
         try {
-            const pdfBytes = await fs.readFileSync("../../Invoice-Requisition-Form_Nov-2024_Fillable.pdf");
+            const pdfBytes = await fs.readFileSync("Invoice-Requisition-Form_Nov-2024_Fillable.pdf");
             const IPRFile = await PDFDocument.load(pdfBytes);
             IPRFile.removePage(1);
             const form = IPRFile.getForm();
@@ -203,7 +201,6 @@ export class InvoicePaymentRequisition {
             IPR.setSupplier(invoice.supplier);
             return IPR;
         } catch(e) {
-            console.log(e);
             throw e;
         }
     }
@@ -222,7 +219,6 @@ export class InvoicePaymentRequisition {
             this.File = fileBytes;
             return fileBytes;
         } catch(e) {
-            console.log("Invoice processor: " + e.message);
             throw e;
         }
 

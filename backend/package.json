@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "netlify deploy --prod"
+    "start": "node src/app.js"
   },
   "dependencies": {
     "@napi-rs/canvas": "^0.1.88",

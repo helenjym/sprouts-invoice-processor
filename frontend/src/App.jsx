@@ -440,6 +440,7 @@ function AccountDropdown({handleChange}) {
   const accounts = [
     {code: 60015, name: "Cafe purchases"},
     {code: 60075, name: "Produce market purchases"},
+    {code: 70028, name: "Merchandise expense"}
   ];
 
   const accountOptions = accounts.map(account => 

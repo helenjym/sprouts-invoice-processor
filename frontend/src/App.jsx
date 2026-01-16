@@ -16,7 +16,7 @@ function App() {
 
   async function fetchData() {
     try {
-      const response = await fetch('https://server-production-7685.up.railway.app/suppliers');
+      const response = await fetch(import.meta.env.VITE_BACKEND_HOST + "/suppliers");
       const suppliersObj = await response.json();
       setSuppliers(suppliersObj);
       setConnectionError(false);

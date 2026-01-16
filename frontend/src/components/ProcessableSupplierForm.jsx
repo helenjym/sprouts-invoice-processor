@@ -30,7 +30,7 @@ export default function ProcessableSupplierForm({supplier}) {
         setInvoiceNum(uploadResponseText);
         const downloadResponse = await fetch(import.meta.env.VITE_BACKEND_URL + "/download/" + uploadResponseText);
         if (!downloadResponse.ok) {
-          console.err(downloadResponse.statusText);
+          console.error(downloadResponse.statusText);
           throw new Error(`Response status: ${downloadResponse.status}`);
         }
         const blob = await downloadResponse.blob();
@@ -39,7 +39,7 @@ export default function ProcessableSupplierForm({supplier}) {
     }
     } catch(err) {
       setErr("Error occurred, please check inputs or try again later!");
-      console.err(err);
+      console.error(err);
     }
   }
 

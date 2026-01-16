@@ -2,14 +2,14 @@
 
 # dependencies
 /node_modules
-
+/uploads/Invoice.pdf
+/uploads/VoidCheque.pdf
 
 # testing
 /coverage
 /invoices
 /src/InvoicePayment.json
 /src/IPR_Merged.pdf
-
 
 
 # production

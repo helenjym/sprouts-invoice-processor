@@ -37,7 +37,6 @@ const storage=multer.diskStorage({
 // code adapted from https://medium.com/@sridhar_be/file-validations-using-magic-numbers-in-nodejs-express-server-d8fbb31a97e7
 function validateUploadedFile(file) {
     if (file.size > 5*1024*1024) {
-        console.log("File too large")
         return false;
     }    
     try {
@@ -47,18 +46,16 @@ function validateUploadedFile(file) {
             fs.readSync(fd, buffer, 0, 5, 0);
             const hexSignature = buffer.toString('hex').toUpperCase();
             const signature = '255044462D';
-            console.log(hexSignature)
             fs.closeSync(fd)
             const isValid = (signature === hexSignature)
-            console.log(isValid);
             return isValid; 
         } catch(err) {
-            console.log(err);
+            console.err(err);
             fs.closeSync(fd);
             return false;
         }
     } catch(e) {
-        console.log(e);
+        console.err(e);
         return false;
     }
 }
@@ -87,7 +84,7 @@ app.post('/upload', upload.fields([
 ], async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        console.log(errors.array);
+        console.err(errors.array);
         return res.status(400).json({errors: errors.array()});
     }
     if (req.files["invoice"] === undefined) {
@@ -120,7 +117,7 @@ app.post('/upload', upload.fields([
         fs.writeFileSync("src/InvoicePayment.json", jsonData, 'utf-8');
         res.status(200).send("Upload succesful");
     } catch(e) {
-        console.log(e);
+        console.err(e);
         res.status(500).send("Error occurred while uploading");
     }
 });
@@ -129,15 +126,12 @@ app.post('/upload/:supplier', upload.single('invoice'), [check("purpose").trim()
     check("accCode").trim().notEmpty().matches(/^[0-9]+$/).isLength(5),
     check("treasurerName").trim().notEmpty().matches(/^[A-Za-z\s]+$/)
 ], async (req, res) => {
-    console.log(req.body, req.file)
     const accCode = Number(req.body.accCode);
     try {
         const invoicePayment = await InvoicePayment.createFromParseableInvoice(req.params.supplier, accCode, req.body.purpose, req.body.treasurerName);
-        console.log(invoicePayment)
         if (isNaN(invoicePayment.invoiceNum)) {
             res.status(500).send("Error occurred while uploading");
         } else {
-            console.log(invoicePayment);
             const IPR = await InvoicePaymentRequisition.create(invoicePayment);
             const bytes = await IPR.attachSupportingDoc("uploads/Invoice.pdf");
             fs.writeFileSync("src/IPR_Merged.pdf", bytes, 'utf-8');
@@ -146,7 +140,7 @@ app.post('/upload/:supplier', upload.single('invoice'), [check("purpose").trim()
             res.status(200).send(invoicePayment.invoiceNum);
         }
     } catch(e) {
-        console.log(e);
+        console.err(e);
         res.status(500).send("Error occurred while uploading");
     }
 });
@@ -167,7 +161,7 @@ app.get('/download/:iv', check("iv").trim().notEmpty().matches(/^[A-Za-z0-9-\s]+
         }
 
     } catch(e) {
-        console.log(e);
+        console.err(e);
         res.status(500).send("Error occurred while downloading");
     }
 });
@@ -179,7 +173,7 @@ app.get('/suppliers', (req, res) => {
         const suppliers = JSON.parse(suppliersFile);
         res.json(suppliers);
     } catch(e) {
-        console.log(e);
+        console.err(e);
         res.status(500).send("Error occurred");
     }
 })

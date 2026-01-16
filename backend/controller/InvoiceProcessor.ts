@@ -65,7 +65,6 @@ export class InvoicePayment {
         invoice.setPaymentPurpose(purpose);
         invoice.setEmail(email);
         invoice.setName(treasurerName);
-        console.log(invoice);
         return invoice;
     }
 
@@ -86,7 +85,6 @@ export class InvoicePayment {
             }
             return invoice;
         } catch(e){
-            console.log("Invoice processor: " + e.message);
             throw e;
         }
     }    
@@ -203,7 +201,6 @@ export class InvoicePaymentRequisition {
             IPR.setSupplier(invoice.supplier);
             return IPR;
         } catch(e) {
-            console.log(e);
             throw e;
         }
     }
@@ -222,7 +219,6 @@ export class InvoicePaymentRequisition {
             this.File = fileBytes;
             return fileBytes;
         } catch(e) {
-            console.log("Invoice processor: " + e.message);
             throw e;
         }
 

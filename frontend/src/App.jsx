@@ -16,7 +16,8 @@ function App() {
 
   async function fetchData() {
     try {
-      const response = await fetch(import.meta.env.BACKEND_URL + "/suppliers");
+      const response = await fetch(import.meta.env.VITE_BACKEND_URL
+        + "/suppliers");
       const suppliersObj = await response.json();
       setSuppliers(suppliersObj);
       setConnectionError(false);
@@ -218,7 +219,7 @@ function GeneralSupplierForm({supplier}) {
         form.append("voidCheque", voidCheque);
       }
       try {
-        const uploadResponse = await fetch(import.meta.env.BACKEND_URL + "/upload", {
+        const uploadResponse = await fetch(import.meta.env.VITE_BACKEND_URL + "/upload", {
           method: "POST",
           body: form,
         });
@@ -227,7 +228,7 @@ function GeneralSupplierForm({supplier}) {
           console.log(uploadResponseText);
           throw new Error("File upload error");
         }
-        const downloadResponse = await fetch(import.meta.env.BACKEND_URL + '/download/' + invoiceNum);
+        const downloadResponse = await fetch(import.meta.env.VITE_BACKEND_URL + '/download/' + invoiceNum);
         if (!downloadResponse.ok) {
           const downloadResponseText = await downloadResponse.text();
           console.log(downloadResponseText);  
@@ -356,7 +357,8 @@ function ProcessableSupplierForm({supplier}) {
     form.append("treasurerName", name);
     form.append("invoice", file);
     try {
-      const uploadResponse = await fetch(import.meta.env.BACKEND_URL + "/upload/" + supplierName, {
+      const uploadResponse = await fetch(import.meta.env.VITE_BACKEND_URL
+        + "/upload/" + supplierName, {
         method: "POST",
         body: form,
       });
@@ -366,7 +368,7 @@ function ProcessableSupplierForm({supplier}) {
         throw new Error(`Response status: ${uploadResponse.status}`);
       } else {
         setInvoiceNum(uploadResponseText);
-        const downloadResponse = await fetch(import.meta.env.BACKEND_URL + '/download/' + uploadResponseText);
+        const downloadResponse = await fetch(import.meta.env.VITE_BACKEND_URL          + '/download/' + uploadResponseText);
         if (!downloadResponse.ok) {
           console.log(downloadResponse.statusText);
           throw new Error(`Response status: ${downloadResponse.status}`);

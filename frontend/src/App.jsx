@@ -340,7 +340,7 @@ function ProcessableSupplierForm({supplier}) {
   const [name, setName] = useState(null);
   const [purpose, setPurpose] = useState(null);
   const [file, setFile] = useState(null);
-  const [fileLink, setFileLink] = useState("previewerDefault.html");
+  const [fileLink, setFileLink] = useState("/previewerDefault.html");
   const [err, setErr] = useState(null);
   const [invoiceNum, setInvoiceNum]  = useState(null);
 
@@ -485,7 +485,7 @@ function DownloadButton({file, invoiceNum, supplier}) {
 
   return (
     <div className="download">
-      {(file === "previewerDefault.html") ?  
+      {(file === "/previewerDefault.html") ?  
       <>
         <button className="download-btn" onClick={() => {setDownloadError(true)}}>Download PDF &#128140;</button>
       </> :
@@ -494,7 +494,7 @@ function DownloadButton({file, invoiceNum, supplier}) {
         Download PDF &#128140;</button>
       </a>
     }
-    {(downloadError && file === "previewerDefault.html") && <p className="rhs-error-msg">No invoice uploaded!</p>}
+    {(downloadError && file === "/previewerDefault.html") && <p className="rhs-error-msg">No invoice uploaded!</p>}
     </div>
   );
 }

@@ -23,7 +23,7 @@ function App() {
       setConnectionError(false);
     } catch(e) {
       setConnectionError(true);
-      console.log(e);
+      console.err(e);
     }
   }
 
@@ -37,13 +37,10 @@ function App() {
     }
   }
   function handleTheme() {
-    console.log("toggling theme");
     if (theme === "day") {
-      console.log("light->dark");
       document.querySelector('body').setAttribute('data-theme', 'dark');
       setTheme("night");
     } else if (theme === "night") {
-      console.log("dark->light");
       document.querySelector('body').setAttribute('data-theme', 'light');
       setTheme("day");
     }
@@ -174,19 +171,14 @@ function GeneralSupplierForm({supplier}) {
   }
   async function validateFile(blob) {
     if (blob.size > 5*1024*1024) {
-      console.log("File in response is too large")
       return false;
     }
       const arrayBuffer = await blob.arrayBuffer();
       const bytes = new Uint8Array(arrayBuffer);      
       const signatureBytes = bytes.slice(0, 5);
       const signature = signatureBytes.toHex().toUpperCase();
-      console.log(signature);
       const PDFsignature = '255044462D';
       const isValid = (signature === PDFsignature);
-      if (!isValid) {
-        console.log("File in response is not a PDF")
-      }
       return isValid;
 
   }
@@ -194,7 +186,6 @@ function GeneralSupplierForm({supplier}) {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    console.log(supplier);
     if (supplier === "") {
       return alert("Please choose a supplier")
     } else {
@@ -225,13 +216,11 @@ function GeneralSupplierForm({supplier}) {
         });
         if (!uploadResponse.ok) {
           const uploadResponseText = await uploadResponse.text();
-          console.log(uploadResponseText);
           throw new Error("File upload error");
         }
         const downloadResponse = await fetch(import.meta.env.VITE_BACKEND_URL + '/download/' + invoiceNum);
         if (!downloadResponse.ok) {
           const downloadResponseText = await downloadResponse.text();
-          console.log(downloadResponseText);  
           throw new Error("File download error");
         }
         const blob = await downloadResponse.blob();
@@ -243,7 +232,7 @@ function GeneralSupplierForm({supplier}) {
         setFileLink(fileURL);
       } catch(e) {
         setErr("Error occurred: " + e.message);
-        console.log(e);
+        console.err(e);
         return;
       }
     }
@@ -349,7 +338,6 @@ function ProcessableSupplierForm({supplier}) {
   async function handleProcessableSubmit(e) {
     e.preventDefault();
     setErr(null);
-    console.log(accCode);
     const form = new FormData();
     const supplierName = supplier.name;
     form.append("accCode", accCode);
@@ -363,14 +351,13 @@ function ProcessableSupplierForm({supplier}) {
         body: form,
       });
       const uploadResponseText = await uploadResponse.text();
-      console.log(uploadResponseText);
       if (!uploadResponse.ok) {
         throw new Error(`Response status: ${uploadResponse.status}`);
       } else {
         setInvoiceNum(uploadResponseText);
         const downloadResponse = await fetch(import.meta.env.VITE_BACKEND_URL          + '/download/' + uploadResponseText);
         if (!downloadResponse.ok) {
-          console.log(downloadResponse.statusText);
+          console.err(downloadResponse.statusText);
           throw new Error(`Response status: ${downloadResponse.status}`);
         }
         const blob = await downloadResponse.blob();
@@ -379,7 +366,7 @@ function ProcessableSupplierForm({supplier}) {
     }
     } catch(err) {
       setErr("Error occurred, please check inputs or try again later!");
-      console.log(err);
+      console.err(err);
     }
   }
 

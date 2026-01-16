@@ -8,8 +8,8 @@
 /invoices
 /src/InvoicePayment.json
 /src/IPR_Merged.pdf
-/uploads/Invoice.pdf
-/uploads/VoidCheque.pdf
+uploads/*
+!uploads/.gitkeep
 
 
 

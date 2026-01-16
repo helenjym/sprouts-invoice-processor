@@ -16,7 +16,8 @@ function App() {
 
   async function fetchData() {
     try {
-      const response = await fetch('http://localhost:3010/suppliers');
+      const response = await fetch(import.meta.env.VITE_BACKEND_URL
+        + "/suppliers");
       const suppliersObj = await response.json();
       setSuppliers(suppliersObj);
       setConnectionError(false);
@@ -103,7 +104,7 @@ function GeneralSupplierForm({supplier}) {
   const [voidCheque, setVoidCheque] = useState(null);
   const [showInvNumChar, setshowInvNumChar] = useState(1);
   const [err, setErr] = useState(null);
-  const [fileLink, setFileLink] = useState("src/previewerDefault.html");
+  const [fileLink, setFileLink] = useState("/previewerDefault.html");
   const [supplierName, setSupplierName] = useState(null);
   
 
@@ -209,7 +210,7 @@ function GeneralSupplierForm({supplier}) {
         form.append("voidCheque", voidCheque);
       }
       try {
-        const uploadResponse = await fetch('http://localhost:3010/upload', {
+        const uploadResponse = await fetch(import.meta.env.VITE_BACKEND_URL + "/upload", {
           method: "POST",
           body: form,
         });
@@ -217,7 +218,7 @@ function GeneralSupplierForm({supplier}) {
           const uploadResponseText = await uploadResponse.text();
           throw new Error("File upload error");
         }
-        const downloadResponse = await fetch('http://localhost:3010/download/' + invoiceNum);
+        const downloadResponse = await fetch(import.meta.env.VITE_BACKEND_URL + '/download/' + invoiceNum);
         if (!downloadResponse.ok) {
           const downloadResponseText = await downloadResponse.text();
           throw new Error("File download error");
@@ -329,7 +330,7 @@ function ProcessableSupplierForm({supplier}) {
   const [name, setName] = useState(null);
   const [purpose, setPurpose] = useState(null);
   const [file, setFile] = useState(null);
-  const [fileLink, setFileLink] = useState("src/previewerDefault.html");
+  const [fileLink, setFileLink] = useState("/previewerDefault.html");
   const [err, setErr] = useState(null);
   const [invoiceNum, setInvoiceNum]  = useState(null);
 
@@ -344,7 +345,8 @@ function ProcessableSupplierForm({supplier}) {
     form.append("treasurerName", name);
     form.append("invoice", file);
     try {
-      const uploadResponse = await fetch('http://localhost:3010/upload/' + supplierName, {
+      const uploadResponse = await fetch(import.meta.env.VITE_BACKEND_URL
+        + "/upload/" + supplierName, {
         method: "POST",
         body: form,
       });
@@ -353,8 +355,9 @@ function ProcessableSupplierForm({supplier}) {
         throw new Error(`Response status: ${uploadResponse.status}`);
       } else {
         setInvoiceNum(uploadResponseText);
-        const downloadResponse = await fetch('http://localhost:3010/download/' + uploadResponseText);
+        const downloadResponse = await fetch(import.meta.env.VITE_BACKEND_URL          + '/download/' + uploadResponseText);
         if (!downloadResponse.ok) {
+          console.error(downloadResponse.statusText);
           throw new Error(`Response status: ${downloadResponse.status}`);
         }
         const blob = await downloadResponse.blob();
@@ -437,6 +440,7 @@ function AccountDropdown({handleChange}) {
   const accounts = [
     {code: 60015, name: "Cafe purchases"},
     {code: 60075, name: "Produce market purchases"},
+    {code: 70028, name: "Merchandise expense"}
   ];
 
   const accountOptions = accounts.map(account => 
@@ -471,7 +475,7 @@ function DownloadButton({file, invoiceNum, supplier}) {
 
   return (
     <div className="download">
-      {(file === "src/previewerDefault.html") ?  
+      {(file === "/previewerDefault.html") ?  
       <>
         <button className="download-btn" onClick={() => {setDownloadError(true)}}>Download PDF &#128140;</button>
       </> :
@@ -480,7 +484,7 @@ function DownloadButton({file, invoiceNum, supplier}) {
         Download PDF &#128140;</button>
       </a>
     }
-    {(downloadError && file === "src/previewerDefault.html") && <p className="rhs-error-msg">No invoice uploaded!</p>}
+    {(downloadError && file === "/previewerDefault.html") && <p className="rhs-error-msg">No invoice uploaded!</p>}
     </div>
   );
 }
